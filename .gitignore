@@ -3,3 +3,4 @@ _CATALOG.VIX
 .DS_Store
 vbtg-master/*
 lastParams.pickle
+.vscode/*

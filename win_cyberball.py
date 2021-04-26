@@ -10,6 +10,9 @@ import win32gui
 import win32con
 import winsound
 
+import glob
+import os.path as path
+
 #参加者IDの入力を求め，それをファイル名に使う
 try:
     expInfo = misc.fromFile('lastParams.pickle')
@@ -47,60 +50,84 @@ def getKeyboardResponse(validResponses,duration=0):
 #画面設定をして、それをmyWinに入れる(myWinと打つだけで設定もはいる）
 myWin =visual.Window (fullscr=False, monitor= 'Default', units='norm', color= (0,0,0))
 myWin.setMouseVisible(False)
+w, h = myWin.size[0], myWin.size[1]      # Size of window
+
+v_split = 0.7
+uprof_pos = (0.0, (0.5 - (1 - v_split) / 2) * h)               # Center of user profile section
+uprof_size = [w, (1 - v_split) * h]
+
+act_pos =   (0.0, (v_split / 2 - 0.5) * h)              # Center of activity area
+act_size = [w, v_split * h]
+
+def make_actimagestim(path):
+    return visual.ImageStim(myWin, image=path, units="pix", pos=act_pos, size=act_size) 
+
+def make_faceimagestim(path, pos):
+    return visual.ImageStim(myWin, image=path, units="pix", pos=pos, size=act_size) 
 
 #提示刺激を準備
-wait = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/start.bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LS1 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(1).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LS2 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(2).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LS3 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(3).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LS4 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(4).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LS5 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(5).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LS6 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(6).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LS7 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(7).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LS8 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(8).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LR1 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(1).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LR2 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(2).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LR3 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(3).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LR4 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(4).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LR5 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(5).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LR6 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(6).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LR7 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(7).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LR8 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(8).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-LR9 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(9).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RS1 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(1).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RS2 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(2).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RS3 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(3).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RS4 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(4).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RS5 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(5).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RS6 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(6).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RS7 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(7).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RS8 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(8).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RL1 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(1).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RL2 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(2).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RL3 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(3).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RL4 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(4).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RL5 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(5).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RL6 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(6).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RL7 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(7).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RL8 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(8).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-RL9 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(9).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SL1 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(1).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SL2 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(2).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SL3 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(3).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SL4 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(4).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SL5 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(5).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SL6 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(6).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SL7 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(7).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SR1 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(1).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SR2 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(2).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SR3 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(3).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SR4 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(4).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SR5 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(5).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SR6 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(6).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
-SR7 = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(7).bmp', mask = None, pos = (0,0), size = [2.0, 2.0])
+wait = make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/start.bmp')
+
+LS1 = make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(1).bmp')
+LS2 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(2).bmp')
+LS3 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(3).bmp')
+LS4 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(4).bmp')
+LS5 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(5).bmp')
+LS6 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(6).bmp')
+LS7 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(7).bmp')
+LS8 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(8).bmp')
+
+LR1 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(1).bmp')
+LR2 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(2).bmp')
+LR3 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(3).bmp')
+LR4 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(4).bmp')
+LR5 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(5).bmp')
+LR6 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(6).bmp')
+LR7 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(7).bmp')
+LR8 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(8).bmp')
+LR9 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(9).bmp')
+
+RS1 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(1).bmp')
+RS2 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(2).bmp')
+RS3 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(3).bmp')
+RS4 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(4).bmp')
+RS5 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(5).bmp')
+RS6 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(6).bmp')
+RS7 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(7).bmp')
+RS8 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(8).bmp')
+
+RL1 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(1).bmp')
+RL2 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(2).bmp')
+RL3 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(3).bmp')
+RL4 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(4).bmp')
+RL5 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(5).bmp')
+RL6 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(6).bmp')
+RL7 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(7).bmp')
+RL8 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(8).bmp')
+RL9 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(9).bmp')
+
+SL1 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(1).bmp')
+SL2 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(2).bmp')
+SL3 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(3).bmp')
+SL4 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(4).bmp')
+SL5 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(5).bmp')
+SL6 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(6).bmp')
+SL7 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(7).bmp')
+
+SR1 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(1).bmp')
+SR2 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(2).bmp')
+SR3 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(3).bmp')
+SR4 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(4).bmp')
+SR5 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(5).bmp')
+SR6 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(6).bmp')
+SR7 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(7).bmp')
 
 conw = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/connectingwindow.bmp', mask = None, pos = (0,0), size = [0.4, 0.25])
 
+face_dir_root = "./stim/face/"
+neg_face = glob.glob(path.join(face_dir_root, "negafile", "*.jpg"))
+neu_face = glob.glob(path.join(face_dir_root, "neufile", "*.jpg"))
+pos_face = glob.glob(path.join(face_dir_root, "posifile", "*.jpg"))
 
 #Lは参加者から見て左、Sは参加者、Rは参加者から見て右。LSは、左の人から参加者にボールが投げられるアクションを指す
 def LS():
@@ -383,33 +410,39 @@ results=[]
 if event.getKeys(keyList=["escape"]):
     sys.exit()
 
-#try-except構文
-try :
-    #Count
-    numtotal = 0
-    numsub = 0
-    numcom = 0
-    numR = 0
-    numL = 0
-    numexR = 0
-    numexL = 0
-    numdeinR = 0
-    numdeinL = 0
-    direction = 0
-    i = 0
+#Count
+numtotal = 0
+numsub = 0
+numcom = 0
+numR = 0
+numL = 0
+numexR = 0
+numexL = 0
+numdeinR = 0
+numdeinL = 0
+direction = 0
+i = 0
 
-    #watch
-    instruction1()
-    instruction2()
-    instruction3()
-    connecting()
+#####################################################################################
+# Practice session
 
-    winsound.Beep(523, 5000)
-    for h in range(22):
-        LR()
-        RL()
-    winsound.Beep(523, 500)
-    between()
+#watch
+# instruction1()
+# instruction2()
+# instruction3()
+# connecting()
+
+# winsound.Beep(523, 5000)
+for h in range(22):
+    LR()
+    RL()
+winsound.Beep(523, 500)
+between()
+
+if False:
+
+    #####################################################################################
+    # Inclusion session
 
     #inclusion
     winsound.Beep(523, 5000)
@@ -542,6 +575,9 @@ try :
     winsound.Beep(523, 500)
     between()
 
+    #####################################################################################
+    # Decrease session
+
     #decrease (R基準)
     winsound.Beep(523, 5000)
     numtotal = 0
@@ -667,6 +703,9 @@ try :
     winsound.Beep(523, 500)
     between()
 
+    #####################################################################################
+    # Exclusion session
+
     #exclusion (R基準)
     winsound.Beep(523, 5000)
     numtotal = 0
@@ -789,6 +828,9 @@ try :
                 break
     winsound.Beep(523, 500)
     between()
+
+    #####################################################################################
+    # Increase session
 
     #increase (R基準)
     winsound.Beep(523, 5000)
@@ -914,6 +956,9 @@ try :
                 break
     winsound.Beep(523, 500)
     between()
+
+    #####################################################################################
+    # Re-inclusion session
 
     #Re-inclusion
     winsound.Beep(523, 5000)
@@ -1046,18 +1091,13 @@ try :
             elif numtotal >= 45:
                 break
     winsound.Beep(523, 500)
-    exit()
 
-    curD = os.getcwd()
-    datafile = open(os.path.join(curD,'log/Sub'+expInfo['Participant']+'_'+expInfo['dateStr']+'.csv'),'wb')  #save log as csvfile
-    datafile.write('numtotal,numsub,numcom,h,6ways,direction,responseTime,key\n')
-    for j in results:
-        datafile.write('%d,%d,%d,%d,%d,%s,%f,%s\n' % tuple(j))
-    datafile.close()
-except TypeError:
-        print("e")
-except Exception as e:
-        print (e)
+curD = os.getcwd()
+datafile = open(os.path.join(curD,'log/Sub'+expInfo['Participant']+'_'+expInfo['dateStr']+'.csv'),'wb')  #save log as csvfile
+datafile.write('numtotal,numsub,numcom,h,6ways,direction,responseTime,key\n')
+for j in results:
+    datafile.write('%d,%d,%d,%d,%d,%s,%f,%s\n' % tuple(j))
+datafile.close()
 
 #ウインドウ前面 http://blogs.yahoo.co.jp/topitopi38/1291282.html
 #ウインドウ破棄 http://effbot.org/tkinterbook/toplevel.htm
