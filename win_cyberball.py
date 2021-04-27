@@ -293,11 +293,11 @@ def between():
     between.mainloop()
     myWin.setMouseVisible(False)
 
-    # q = random.uniform(4.5, 100)
-    # conw.draw()
-    # myWin.flip()
-    # core.wait(q)
-    # myWin.setMouseVisible(False)
+    q = random.uniform(4.5, 100)
+    conw.draw()
+    myWin.flip()
+    core.wait(q)
+    myWin.setMouseVisible(False)
 
 def exit():
     myWin.setMouseVisible(True)
