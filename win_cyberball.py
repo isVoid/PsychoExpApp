@@ -3,14 +3,14 @@
 
 #各種モジュールのインポート
 from psychopy import visual, core, event,gui,data,misc
-import numpy, os , random,time,csv
+import numpy
 import tkinter
 from tkinter import *
 import win32gui
 import win32con
 import winsound
 
-import glob
+import glob, os, random, time, csv
 import os.path as path
 
 #参加者IDの入力を求め，それをファイル名に使う
@@ -53,17 +53,23 @@ myWin.setMouseVisible(False)
 w, h = myWin.size[0], myWin.size[1]      # Size of window
 
 v_split = 0.7
-uprof_pos = (0.0, (0.5 - (1 - v_split) / 2) * h)               # Center of user profile section
-uprof_size = [w, (1 - v_split) * h]
+act_pos =   (0.0, v_split - 1)                  # Center of activity area
+act_size = [2.0, 1.4]
 
-act_pos =   (0.0, (v_split / 2 - 0.5) * h)              # Center of activity area
-act_size = [w, v_split * h]
+uprof_pos_y = 1 - 0.5 * v_split           # Center of user profile section
+uprof_size_f = numpy.array([0.8, 0.8])
+
+anim_frame_duration = 0.2                                   # Frame duration of animation
 
 def make_actimagestim(path):
-    return visual.ImageStim(myWin, image=path, units="pix", pos=act_pos, size=act_size) 
+    return visual.ImageStim(myWin, image=path, pos=act_pos, size=act_size) 
 
-def make_faceimagestim(path, pos):
-    return visual.ImageStim(myWin, image=path, units="pix", pos=pos, size=act_size) 
+def make_faceimagestim(path):
+    return visual.ImageStim(myWin, image=path)
+
+def set_face_pair(imstim1, imstim2):
+    imstim1.pos, imstim2.pos = (-0.5, uprof_pos_y), (0.5, uprof_pos_y)
+    imstim1.size, imstim2.size = imstim1.size * uprof_size_f, imstim2.size * uprof_size_f
 
 #提示刺激を準備
 wait = make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/start.bmp')
@@ -124,171 +130,94 @@ SR7 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2
 
 conw = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/connectingwindow.bmp', mask = None, pos = (0,0), size = [0.4, 0.25])
 
+# Face images paths
 face_dir_root = "./stim/face/"
-neg_face = glob.glob(path.join(face_dir_root, "negafile", "*.jpg"))
-neu_face = glob.glob(path.join(face_dir_root, "neufile", "*.jpg"))
-pos_face = glob.glob(path.join(face_dir_root, "posifile", "*.jpg"))
+face_p = {"neg": sorted(glob.glob(path.join(face_dir_root, "negafile", "*.jpg"))),
+            "neu": sorted(glob.glob(path.join(face_dir_root, "neufile", "*.jpg"))),
+            "pos": sorted(glob.glob(path.join(face_dir_root, "posifile", "*.jpg")))}
+neu_dummy_p = path.join(face_dir_root, "neu_0.jpg")
+pos_dummy_p = path.join(face_dir_root, "pos_0.jpg")
+
+# Load face images
+face = {
+    x: [make_faceimagestim(y_p) for y_p in y] for x, y in face_p.items()
+}
+neu_dummy = make_faceimagestim(neu_dummy_p)
+pos_dummy = make_faceimagestim(pos_dummy_p)
+
+def draw(*imgstims):
+    for imgstim in imgstims:
+        imgstim.draw()
+
+def frame(imgstims, duration=0.2):
+    draw(*imgstims)
+    myWin.flip()
+    core.wait(duration)
 
 #Lは参加者から見て左、Sは参加者、Rは参加者から見て右。LSは、左の人から参加者にボールが投げられるアクションを指す
-def LS():
+def LS(l_face, r_face):
+    r = random.uniform(0.5, 1.5) 
+    frame([l_face, r_face, LS1], duration=r)
+    frame([l_face, r_face, LS2], duration=anim_frame_duration)
+    frame([l_face, r_face, LS3], duration=anim_frame_duration)
+    frame([l_face, r_face, LS4], duration=anim_frame_duration)
+    frame([l_face, r_face, LS5], duration=anim_frame_duration)
+    frame([l_face, r_face, LS6], duration=anim_frame_duration)
+    frame([l_face, r_face, LS7], duration=anim_frame_duration)
+    frame([l_face, r_face, LS8], duration=anim_frame_duration)
+
+def LR(l_face, r_face):
     r = random.uniform(0.5, 1.5)
-    LS1.draw()
-    myWin.flip()
-    core.wait(r)
-    LS2.draw()
-    myWin.flip()
-    core.wait(0.2)
-    LS3.draw()
-    myWin.flip()
-    core.wait(0.2)
-    LS4.draw()
-    myWin.flip()
-    core.wait(0.2)
-    LS5.draw()
-    myWin.flip()
-    core.wait(0.2)
-    LS6.draw()
-    myWin.flip()
-    core.wait(0.2)
-    LS7.draw()
-    myWin.flip()
-    core.wait(0.2)
-    LS8.draw()
-    myWin.flip()
-    core.wait(0.2)
+    frame([l_face, r_face, LR1], duration=r)
+    frame([l_face, r_face, LR2], duration=anim_frame_duration)
+    frame([l_face, r_face, LR3], duration=anim_frame_duration)
+    frame([l_face, r_face, LR4], duration=anim_frame_duration)
+    frame([l_face, r_face, LR5], duration=anim_frame_duration)
+    frame([l_face, r_face, LR6], duration=anim_frame_duration)
+    frame([l_face, r_face, LR7], duration=anim_frame_duration)
+    frame([l_face, r_face, LR8], duration=anim_frame_duration)
+    frame([l_face, r_face, LR9], duration=anim_frame_duration)
 
-def LR():
+def RS(l_face, r_face):
     r = random.uniform(0.5, 1.5)
-    LR1.draw()
-    myWin.flip()
-    core.wait(r)
-    LR2.draw()
-    myWin.flip()
-    core.wait(0.2)
-    LR3.draw()
-    myWin.flip()
-    core.wait(0.2)
-    LR4.draw()
-    myWin.flip()
-    core.wait(0.2)
-    LR5.draw()
-    myWin.flip()
-    core.wait(0.2)
-    LR6.draw()
-    myWin.flip()
-    core.wait(0.2)
-    LR7.draw()
-    myWin.flip()
-    core.wait(0.2)
-    LR8.draw()
-    myWin.flip()
-    core.wait(0.2)
-    LR9.draw()
-    myWin.flip()
-    core.wait(0.2)
+    frame([l_face, r_face, RS1], duration=r)
+    frame([l_face, r_face, RS2], duration=anim_frame_duration)
+    frame([l_face, r_face, RS3], duration=anim_frame_duration)
+    frame([l_face, r_face, RS4], duration=anim_frame_duration)
+    frame([l_face, r_face, RS5], duration=anim_frame_duration)
+    frame([l_face, r_face, RS6], duration=anim_frame_duration)
+    frame([l_face, r_face, RS7], duration=anim_frame_duration)
+    frame([l_face, r_face, RS8], duration=anim_frame_duration)
 
-def RS():
+def RL(l_face, r_face):
     r = random.uniform(0.5, 1.5)
-    RS1.draw()
-    myWin.flip()
-    core.wait(r)
-    RS2.draw()
-    myWin.flip()
-    core.wait(0.2)
-    RS3.draw()
-    myWin.flip()
-    core.wait(0.2)
-    RS4.draw()
-    myWin.flip()
-    core.wait(0.2)
-    RS5.draw()
-    myWin.flip()
-    core.wait(0.2)
-    RS6.draw()
-    myWin.flip()
-    core.wait(0.2)
-    RS7.draw()
-    myWin.flip()
-    core.wait(0.2)
-    RS8.draw()
-    myWin.flip()
-    core.wait(0.2)
+    frame([l_face, r_face, RL1], duration=r)
+    frame([l_face, r_face, RL2], duration=anim_frame_duration)
+    frame([l_face, r_face, RL3], duration=anim_frame_duration)
+    frame([l_face, r_face, RL4], duration=anim_frame_duration)
+    frame([l_face, r_face, RL5], duration=anim_frame_duration)
+    frame([l_face, r_face, RL6], duration=anim_frame_duration)
+    frame([l_face, r_face, RL7], duration=anim_frame_duration)
+    frame([l_face, r_face, RL8], duration=anim_frame_duration)
+    frame([l_face, r_face, RL9], duration=anim_frame_duration)
 
-def RL():
-    r = random.uniform(0.5, 1.5)
-    RL1.draw()
-    myWin.flip()
-    core.wait(r)
-    RL2.draw()
-    myWin.flip()
-    core.wait(0.2)
-    RL3.draw()
-    myWin.flip()
-    core.wait(0.2)
-    RL4.draw()
-    myWin.flip()
-    core.wait(0.2)
-    RL5.draw()
-    myWin.flip()
-    core.wait(0.2)
-    RL6.draw()
-    myWin.flip()
-    core.wait(0.2)
-    RL7.draw()
-    myWin.flip()
-    core.wait(0.2)
-    RL8.draw()
-    myWin.flip()
-    core.wait(0.2)
-    RL9.draw()
-    myWin.flip()
-    core.wait(0.2)
+def SL(l_face, r_face):
+    frame([l_face, r_face, SL1], duration=anim_frame_duration)
+    frame([l_face, r_face, SL2], duration=anim_frame_duration)
+    frame([l_face, r_face, SL3], duration=anim_frame_duration)
+    frame([l_face, r_face, SL4], duration=anim_frame_duration)
+    frame([l_face, r_face, SL5], duration=anim_frame_duration)
+    frame([l_face, r_face, SL6], duration=anim_frame_duration)
+    frame([l_face, r_face, SL7], duration=anim_frame_duration)
 
-def SL():
-    SL1.draw()
-    myWin.flip()
-    core.wait(0.2)
-    SL2.draw()
-    myWin.flip()
-    core.wait(0.2)
-    SL3.draw()
-    myWin.flip()
-    core.wait(0.2)
-    SL4.draw()
-    myWin.flip()
-    core.wait(0.2)
-    SL5.draw()
-    myWin.flip()
-    core.wait(0.2)
-    SL6.draw()
-    myWin.flip()
-    core.wait(0.2)
-    SL7.draw()
-    myWin.flip()
-    core.wait(0.2)
-
-def SR():
-    SR1.draw()
-    myWin.flip()
-    core.wait(0.2)
-    SR2.draw()
-    myWin.flip()
-    core.wait(0.2)
-    SR3.draw()
-    myWin.flip()
-    core.wait(0.2)
-    SR4.draw()
-    myWin.flip()
-    core.wait(0.2)
-    SR5.draw()
-    myWin.flip()
-    core.wait(0.2)
-    SR6.draw()
-    myWin.flip()
-    core.wait(0.2)
-    SR7.draw()
-    myWin.flip()
-    core.wait(0.2)
+def SR(l_face, r_face):
+    frame([l_face, r_face, SR1], duration=anim_frame_duration)
+    frame([l_face, r_face, SR2], duration=anim_frame_duration)
+    frame([l_face, r_face, SR3], duration=anim_frame_duration)
+    frame([l_face, r_face, SR4], duration=anim_frame_duration)
+    frame([l_face, r_face, SR5], duration=anim_frame_duration)
+    frame([l_face, r_face, SR6], duration=anim_frame_duration)
+    frame([l_face, r_face, SR7], duration=anim_frame_duration)    
 
 def instruction1():
     myWin.setMouseVisible(True)
@@ -364,11 +293,11 @@ def between():
     between.mainloop()
     myWin.setMouseVisible(False)
 
-    q = random.uniform(4.5, 100)
-    conw.draw()
-    myWin.flip()
-    core.wait(q)
-    myWin.setMouseVisible(False)
+    # q = random.uniform(4.5, 100)
+    # conw.draw()
+    # myWin.flip()
+    # core.wait(q)
+    # myWin.setMouseVisible(False)
 
 def exit():
     myWin.setMouseVisible(True)
@@ -426,34 +355,41 @@ i = 0
 #####################################################################################
 # Practice session
 
-#watch
-# instruction1()
-# instruction2()
-# instruction3()
-# connecting()
+def practice():
+    # instruction1()
+    # instruction2()
+    # instruction3()
+    # connecting()
 
-# winsound.Beep(523, 5000)
-for h in range(22):
-    LR()
-    RL()
-winsound.Beep(523, 500)
-between()
+    winsound.Beep(523, 5000)
+    l_face, r_face = neu_dummy, pos_dummy
+    set_face_pair(l_face, r_face)
+    # for h in range(22):
+    for h in range(1):
+        LR(l_face, r_face)
+        RL(l_face, r_face)
+    winsound.Beep(523, 500)
+    between()
 
-if False:
+#####################################################################################
+# Inclusion session
 
-    #####################################################################################
-    # Inclusion session
-
-    #inclusion
+def inclusion():
     winsound.Beep(523, 5000)
     numtotal = 0
     numsub = 0
     numcom = 0
-    for h in numlist:
+
+    l_face = random.choice(face['neg'])
+    r_face = random.choice(face['pos'])
+    set_face_pair(l_face, r_face)
+
+    # for h in numlist:
+    for h in range(1, 3):
         numpy.random.shuffle(Rlist)
         numpy.random.shuffle(Llist)
         if h == 1:
-            RS()
+            RS(l_face, r_face)
             numtotal = numtotal + 1
             numcom = numcom + 1
             i = 0
@@ -469,12 +405,12 @@ if False:
                 numtotal = numtotal + 1
                 numsub = numsub + 1
                 if 'right' in selectKey:
-                    SR()
+                    SR(l_face, r_face)
                     direction = 'SR'
                     results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
                     i = Rlist[numR]
                     if i == 1:
-                        RS()
+                        RS(l_face, r_face)
                         numtotal = numtotal + 1
                         numcom = numcom + 1
                         direction = 'RS'
@@ -482,14 +418,14 @@ if False:
                         selectKey = 'none'
                         results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
                     elif i == 2:
-                        RL()
+                        RL(l_face, r_face)
                         numtotal = numtotal + 1
                         numcom = numcom + 1
                         direction = 'RL'
                         Rtime = 0
                         selectKey = 'none'
                         results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        LS()
+                        LS(l_face, r_face)
                         numtotal = numtotal + 1
                         numcom = numcom + 1
                         direction = 'LS'
@@ -497,21 +433,21 @@ if False:
                         selectKey = 'none'
                         results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
                     elif i == 3:
-                        RL()
+                        RL(l_face, r_face)
                         numtotal = numtotal + 1
                         numcom = numcom + 1
                         direction = 'RL'
                         Rtime = 0
                         selectKey = 'none'
                         results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        LR()
+                        LR(l_face, r_face)
                         numtotal = numtotal + 1
                         numcom = numcom + 1
                         direction = 'LR'
                         Rtime = 0
                         selectKey = 'none'
                         results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        RS()
+                        RS(l_face, r_face)
                         numtotal = numtotal + 1
                         numcom = numcom + 1
                         direction = 'RS'
@@ -520,12 +456,12 @@ if False:
                         results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
                     numR = numR + 1
                 elif 'left' in selectKey:
-                    SL()
+                    SL(l_face, r_face)
                     direction = 'SL'
                     results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
                     i = Llist[numL]
                     if i == 1:
-                        LS()
+                        LS(l_face, r_face)
                         numtotal = numtotal + 1
                         numcom = numcom + 1
                         direction = 'LS'
@@ -533,14 +469,14 @@ if False:
                         selectKey = 'none'
                         results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
                     elif i == 2:
-                        LR()
+                        LR(l_face, r_face)
                         numtotal = numtotal + 1
                         numcom = numcom + 1
                         direction = 'LR'
                         Rtime = 0
                         selectKey = 'none'
                         results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        RS()
+                        RS(l_face, r_face)
                         numtotal = numtotal + 1
                         numcom = numcom + 1
                         direction = 'RS'
@@ -548,21 +484,21 @@ if False:
                         selectKey = 'none'
                         results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
                     elif i == 3:
-                        LR()
+                        LR(l_face, r_face)
                         numtotal = numtotal + 1
                         numcom = numcom + 1
                         direction = 'LR'
                         Rtime = 0
                         selectKey = 'none'
                         results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        RL()
+                        RL(l_face, r_face)
                         numtotal = numtotal + 1
                         numcom = numcom + 1
                         direction = 'RL'
                         Rtime = 0
                         selectKey = 'none'
                         results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        LS()
+                        LS(l_face, r_face)
                         numtotal = numtotal + 1
                         numcom = numcom + 1
                         direction = 'LS'
@@ -575,10 +511,11 @@ if False:
     winsound.Beep(523, 500)
     between()
 
-    #####################################################################################
-    # Decrease session
+#####################################################################################
+# Decrease session
 
-    #decrease (R基準)
+#decrease (R基準)
+def decrease():
     winsound.Beep(523, 5000)
     numtotal = 0
     numsub = 0
@@ -703,10 +640,11 @@ if False:
     winsound.Beep(523, 500)
     between()
 
-    #####################################################################################
-    # Exclusion session
+#####################################################################################
+# Exclusion session
 
-    #exclusion (R基準)
+#exclusion (R基準)
+def exclusion():
     winsound.Beep(523, 5000)
     numtotal = 0
     numsub = 0
@@ -829,10 +767,11 @@ if False:
     winsound.Beep(523, 500)
     between()
 
-    #####################################################################################
-    # Increase session
+#####################################################################################
+# Increase session
 
-    #increase (R基準)
+#increase (R基準)
+def increase():
     winsound.Beep(523, 5000)
     numtotal = 0
     numsub = 0
@@ -957,10 +896,11 @@ if False:
     winsound.Beep(523, 500)
     between()
 
-    #####################################################################################
-    # Re-inclusion session
+#####################################################################################
+# Re-inclusion session
 
-    #Re-inclusion
+#Re-inclusion
+def re_inclusion():
     winsound.Beep(523, 5000)
     numtotal = 0
     numsub = 0
@@ -1092,12 +1032,23 @@ if False:
                 break
     winsound.Beep(523, 500)
 
-curD = os.getcwd()
-datafile = open(os.path.join(curD,'log/Sub'+expInfo['Participant']+'_'+expInfo['dateStr']+'.csv'),'wb')  #save log as csvfile
-datafile.write('numtotal,numsub,numcom,h,6ways,direction,responseTime,key\n')
-for j in results:
-    datafile.write('%d,%d,%d,%d,%d,%s,%f,%s\n' % tuple(j))
-datafile.close()
+
+def write_exp_data():
+    curD = os.getcwd()
+    datafile = open(os.path.join(curD,'log/Sub'+expInfo['Participant']+'_'+expInfo['dateStr']+'.csv'),'wb')  #save log as csvfile
+    datafile.write('numtotal,numsub,numcom,h,6ways,direction,responseTime,key\n')
+    for j in results:
+        datafile.write('%d,%d,%d,%d,%d,%s,%f,%s\n' % tuple(j))
+    datafile.close()
+
+if __name__ == "__main__":
+    practice()
+    inclusion()
+    # decrease()
+    # exclusion()
+    # increase()
+    # re_inclusion()
+    # write_exp_data()
 
 #ウインドウ前面 http://blogs.yahoo.co.jp/topitopi38/1291282.html
 #ウインドウ破棄 http://effbot.org/tkinterbook/toplevel.htm
