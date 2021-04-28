@@ -356,16 +356,15 @@ i = 0
 # Practice session
 
 def practice():
-    # instruction1()
-    # instruction2()
-    # instruction3()
-    # connecting()
+    instruction1()
+    instruction2()
+    instruction3()
+    connecting()
 
     winsound.Beep(523, 5000)
     l_face, r_face = neu_dummy, pos_dummy
     set_face_pair(l_face, r_face)
-    # for h in range(22):
-    for h in range(1):
+    for h in range(22):
         LR(l_face, r_face)
         RL(l_face, r_face)
     winsound.Beep(523, 500)
@@ -379,13 +378,14 @@ def inclusion():
     numtotal = 0
     numsub = 0
     numcom = 0
+    numR = 0
+    numL = 0
 
     l_face = random.choice(face['neg'])
     r_face = random.choice(face['pos'])
     set_face_pair(l_face, r_face)
 
-    # for h in numlist:
-    for h in range(1, 3):
+    for h in numlist:
         numpy.random.shuffle(Rlist)
         numpy.random.shuffle(Llist)
         if h == 1:
@@ -1048,7 +1048,7 @@ if __name__ == "__main__":
     # exclusion()
     # increase()
     # re_inclusion()
-    # write_exp_data()
+    write_exp_data()
 
 #ウインドウ前面 http://blogs.yahoo.co.jp/topitopi38/1291282.html
 #ウインドウ破棄 http://effbot.org/tkinterbook/toplevel.htm
