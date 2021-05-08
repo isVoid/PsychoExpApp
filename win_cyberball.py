@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-#各種モジュールのインポート
 from psychopy import visual, core, event,gui,data,misc
 import numpy
 import tkinter
@@ -14,38 +13,27 @@ import glob, os, random, time, csv
 import os.path as path
 
 #参加者IDの入力を求め，それをファイル名に使う
-try:
-    expInfo = misc.fromFile('lastParams.pickle')
-except:
-    expInfo = {'Participant':'001'}
+def user_id_input():
+    try:
+        expInfo = misc.fromFile('lastParams.pickle')
+    except:
+        expInfo = {'Participant':'001'}
 
-expInfo['dateStr']= data.getDateStr()
+    expInfo['dateStr']= data.getDateStr()
 
-dlg = gui.DlgFromDict(expInfo, title='Experiment', fixed=['dateStr'])
-if dlg.OK:
-    misc.toFile('lastParams.pickle', expInfo)
-else:
-    core.quit()
+    dlg = gui.DlgFromDict(expInfo, title='Experiment', fixed=['dateStr'])
+    if dlg.OK:
+        misc.toFile('lastParams.pickle', expInfo)
+    else:
+        core.quit()
 
 #http://sapir.psych.wisc.edu/wiki/index.php/Psychopyのスクリプト
-def getKeyboardResponse(validResponses,duration=0):
+def getKeyboardResponse(validResponses):
     event.clearEvents() #important - prevents buffer overruns
-    responded = False
-    timeElapsed = False
-    rt = '*'
-    responseTimer = core.Clock()
-    if duration==0:
-        responded = event.waitKeys(keyList=validResponses)
-        rt = responseTimer.getTime()
-        return [responded[0],rt] #only get the first response. no timer for waitKeys, so do it manually w/ a clock
-    else:
-        while responseTimer.getTime() < duration:
-            if not responded:
-                responded = event.getKeys(keyList=validResponses,timeStamped=responseTimer)
-        if not responded:
-            return ['*','*']
-        else:
-            return responded[0]  #only get the first response
+    responseTimer = core.Clock()    
+    responded = event.waitKeys(keyList=validResponses)
+    rt = responseTimer.getTime()
+    return [responded[0], rt] #only get the first response. no timer for waitKeys, so do it manually w/ a clock
 
 #画面設定をして、それをmyWinに入れる(myWinと打つだけで設定もはいる）
 myWin =visual.Window (fullscr=False, monitor= 'Default', units='norm', color= (0,0,0))
@@ -72,78 +60,74 @@ def set_face_pair(imstim1, imstim2):
     imstim1.size, imstim2.size = imstim1.size * uprof_size_f, imstim2.size * uprof_size_f
 
 #提示刺激を準備
-wait = make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/start.bmp')
+wait = make_actimagestim('./stim/start.bmp')
 
-LS1 = make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(1).bmp')
-LS2 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(2).bmp')
-LS3 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(3).bmp')
-LS4 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(4).bmp')
-LS5 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(5).bmp')
-LS6 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(6).bmp')
-LS7 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(7).bmp')
-LS8 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1toY(8).bmp')
+LS1 = make_actimagestim('./stim/1toY(1).bmp')
+LS2 =  make_actimagestim('./stim/1toY(2).bmp')
+LS3 =  make_actimagestim('./stim/1toY(3).bmp')
+LS4 =  make_actimagestim('./stim/1toY(4).bmp')
+LS5 =  make_actimagestim('./stim/1toY(5).bmp')
+LS6 =  make_actimagestim('./stim/1toY(6).bmp')
+LS7 =  make_actimagestim('./stim/1toY(7).bmp')
+LS8 =  make_actimagestim('./stim/1toY(8).bmp')
 
-LR1 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(1).bmp')
-LR2 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(2).bmp')
-LR3 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(3).bmp')
-LR4 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(4).bmp')
-LR5 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(5).bmp')
-LR6 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(6).bmp')
-LR7 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(7).bmp')
-LR8 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(8).bmp')
-LR9 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/1to2(9).bmp')
+LR1 =  make_actimagestim('./stim/1to2(1).bmp')
+LR2 =  make_actimagestim('./stim/1to2(2).bmp')
+LR3 =  make_actimagestim('./stim/1to2(3).bmp')
+LR4 =  make_actimagestim('./stim/1to2(4).bmp')
+LR5 =  make_actimagestim('./stim/1to2(5).bmp')
+LR6 =  make_actimagestim('./stim/1to2(6).bmp')
+LR7 =  make_actimagestim('./stim/1to2(7).bmp')
+LR8 =  make_actimagestim('./stim/1to2(8).bmp')
+LR9 =  make_actimagestim('./stim/1to2(9).bmp')
 
-RS1 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(1).bmp')
-RS2 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(2).bmp')
-RS3 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(3).bmp')
-RS4 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(4).bmp')
-RS5 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(5).bmp')
-RS6 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(6).bmp')
-RS7 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(7).bmp')
-RS8 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2toY(8).bmp')
+RS1 =  make_actimagestim('./stim/2toY(1).bmp')
+RS2 =  make_actimagestim('./stim/2toY(2).bmp')
+RS3 =  make_actimagestim('./stim/2toY(3).bmp')
+RS4 =  make_actimagestim('./stim/2toY(4).bmp')
+RS5 =  make_actimagestim('./stim/2toY(5).bmp')
+RS6 =  make_actimagestim('./stim/2toY(6).bmp')
+RS7 =  make_actimagestim('./stim/2toY(7).bmp')
+RS8 =  make_actimagestim('./stim/2toY(8).bmp')
 
-RL1 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(1).bmp')
-RL2 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(2).bmp')
-RL3 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(3).bmp')
-RL4 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(4).bmp')
-RL5 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(5).bmp')
-RL6 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(6).bmp')
-RL7 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(7).bmp')
-RL8 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(8).bmp')
-RL9 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/2to1(9).bmp')
+RL1 =  make_actimagestim('./stim/2to1(1).bmp')
+RL2 =  make_actimagestim('./stim/2to1(2).bmp')
+RL3 =  make_actimagestim('./stim/2to1(3).bmp')
+RL4 =  make_actimagestim('./stim/2to1(4).bmp')
+RL5 =  make_actimagestim('./stim/2to1(5).bmp')
+RL6 =  make_actimagestim('./stim/2to1(6).bmp')
+RL7 =  make_actimagestim('./stim/2to1(7).bmp')
+RL8 =  make_actimagestim('./stim/2to1(8).bmp')
+RL9 =  make_actimagestim('./stim/2to1(9).bmp')
 
-SL1 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(1).bmp')
-SL2 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(2).bmp')
-SL3 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(3).bmp')
-SL4 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(4).bmp')
-SL5 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(5).bmp')
-SL6 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(6).bmp')
-SL7 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto1(7).bmp')
+SL1 =  make_actimagestim('./stim/Yto1(1).bmp')
+SL2 =  make_actimagestim('./stim/Yto1(2).bmp')
+SL3 =  make_actimagestim('./stim/Yto1(3).bmp')
+SL4 =  make_actimagestim('./stim/Yto1(4).bmp')
+SL5 =  make_actimagestim('./stim/Yto1(5).bmp')
+SL6 =  make_actimagestim('./stim/Yto1(6).bmp')
+SL7 =  make_actimagestim('./stim/Yto1(7).bmp')
 
-SR1 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(1).bmp')
-SR2 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(2).bmp')
-SR3 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(3).bmp')
-SR4 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(4).bmp')
-SR5 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(5).bmp')
-SR6 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(6).bmp')
-SR7 =  make_actimagestim('C:/Users/micha/Documents/cyberball/cyberball/stim/Yto2(7).bmp')
+SR1 =  make_actimagestim('./stim/Yto2(1).bmp')
+SR2 =  make_actimagestim('./stim/Yto2(2).bmp')
+SR3 =  make_actimagestim('./stim/Yto2(3).bmp')
+SR4 =  make_actimagestim('./stim/Yto2(4).bmp')
+SR5 =  make_actimagestim('./stim/Yto2(5).bmp')
+SR6 =  make_actimagestim('./stim/Yto2(6).bmp')
+SR7 =  make_actimagestim('./stim/Yto2(7).bmp')
 
-conw = visual.ImageStim(myWin, image=u'C:/Users/micha/Documents/cyberball/cyberball/stim/connectingwindow.bmp', mask = None, pos = (0,0), size = [0.4, 0.25])
+conw = visual.ImageStim(myWin, image=u'./stim/connectingwindow.bmp', mask = None, pos = (0,0), size = [0.4, 0.25])
 
 # Face images paths
 face_dir_root = "./stim/face/"
 face_p = {"neg": sorted(glob.glob(path.join(face_dir_root, "negafile", "*.jpg"))),
             "neu": sorted(glob.glob(path.join(face_dir_root, "neufile", "*.jpg"))),
             "pos": sorted(glob.glob(path.join(face_dir_root, "posifile", "*.jpg")))}
-neu_dummy_p = path.join(face_dir_root, "neu_0.jpg")
-pos_dummy_p = path.join(face_dir_root, "pos_0.jpg")
 
 # Load face images
 face = {
     x: [make_faceimagestim(y_p) for y_p in y] for x, y in face_p.items()
 }
-neu_dummy = make_faceimagestim(neu_dummy_p)
-pos_dummy = make_faceimagestim(pos_dummy_p)
 
 def draw(*imgstims):
     for imgstim in imgstims:
@@ -316,41 +300,28 @@ def exit():
     exit.mainloop()
     myWin.setMouseVisible(False)
 
-#lists
-numlist = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45]
-Rlist = [1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3]
-Llist = [1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3,1,2,3]
-exnumlist = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45]
-exRlist = [2,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,1,1,1,1]
-exLlist = [1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
-deinnumlist = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40,41,42,43,44,45]
-deinRlist = [2,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,1,2,1,1,1,1,1,1,1,2,1,1,1,2,1,1,1,1,1,1,1,1]
-deinLlist = [1,2,1,2,1,1,1,2,1,1,1,2,1,1,1,1,2,1,1,1,1,2,1,1,2,1,1,1,1,1,2,1,1,1,1,1,1,1,1,1]
+# The id corresponding to the left and right user profile, cannot be the same
+left_person_id = random.randint(0, len(face['pos']) - 1)
+right_person_id = random.choice([x for x in range(len(face['pos'])) if x != left_person_id])
 
-#clock
-trialClock = core.Clock()
-trialClock.reset()
-t = 0
-
-#結果をいれる場所を準備
-results=[]
-
-# Escで終了
-if event.getKeys(keyList=["escape"]):
-    sys.exit()
-
-#Count
-numtotal = 0
-numsub = 0
-numcom = 0
-numR = 0
-numL = 0
-numexR = 0
-numexL = 0
-numdeinR = 0
-numdeinL = 0
-direction = 0
-i = 0
+def prob_model(rnd_left, Spass_left, a):
+    """
+    Probablistic model for passing to user
+    Controled by parameter a, in range (0, 1.0)
+    a = 0.5, same probability passing to user across
+    the session; a < 0.5, more probability passing to user
+    towards the end of the session; a > 0.5, more probability
+    passing to user towards the start of the session.
+    """
+    not_Spass_left = rnd_left - Spass_left
+    if Spass_left * 2 >= rnd_left:
+        return True
+    else:
+        x = Spass_left * a
+        y = not_Spass_left / 2 * (1 - a)
+        x, y = x / (x + y), y / (x + y)
+        r = random.uniform(0, 1.0)
+        return r < x
 
 #####################################################################################
 # Practice session
@@ -362,7 +333,7 @@ def practice():
     connecting()
 
     winsound.Beep(523, 5000)
-    l_face, r_face = neu_dummy, pos_dummy
+    l_face, r_face = face['neu'][left_person_id], face['neu'][right_person_id]
     set_face_pair(l_face, r_face)
     for h in range(22):
         LR(l_face, r_face)
@@ -371,686 +342,56 @@ def practice():
     between()
 
 #####################################################################################
-# Inclusion session
+# Session template
 
-def inclusion():
-    winsound.Beep(523, 5000)
-    numtotal = 0
-    numsub = 0
-    numcom = 0
-    numR = 0
-    numL = 0
+# position: 0 self, 1 left, 2 right
 
-    l_face = random.choice(face['neg'])
-    r_face = random.choice(face['pos'])
+def session(total_passes, a = 0.5):
+    # winsound.Beep(523, 5000)
+
+    emotions = list(face.keys())
+    l_emo, r_emo = random.choice(emotions), random.choice(emotions)
+    l_face, r_face = face[l_emo][left_person_id], face[r_emo][right_person_id]
     set_face_pair(l_face, r_face)
 
-    for h in numlist:
-        numpy.random.shuffle(Rlist)
-        numpy.random.shuffle(Llist)
-        if h == 1:
-            RS(l_face, r_face)
-            numtotal = numtotal + 1
-            numcom = numcom + 1
-            i = 0
-            direction = 'RS'
-            Rtime = 0
-            selectKey = 0
-            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
+    cur_pos = random.randint(0, 2)
+    num_Spass = 0
+    num_Spass_totl = round(total_passes / 3)
+    if cur_pos == 0:
+        frame([l_face, r_face, LS1])
+    for rnd in range(total_passes):
+        if cur_pos == 0:
+            (selectKey, react_time) = getKeyboardResponse(['left', 'right'])
+            if 'left' in selectKey:
+                SL(l_face, r_face)
+                cur_pos = 1
+            elif 'right' in selectKey:
+                SR(l_face, r_face)
+                cur_pos = 2
         else:
-            if numtotal < 45:
-                trialClock.reset()
-                t = trialClock.getTime()
-                (selectKey, Rtime) = getKeyboardResponse(['right', 'left'], duration = 0) #'K' in selectKey is written in capital letter
-                numtotal = numtotal + 1
-                numsub = numsub + 1
-                if 'right' in selectKey:
-                    SR(l_face, r_face)
-                    direction = 'SR'
-                    results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    i = Rlist[numR]
-                    if i == 1:
-                        RS(l_face, r_face)
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    elif i == 2:
-                        RL(l_face, r_face)
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RL'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        LS(l_face, r_face)
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    elif i == 3:
-                        RL(l_face, r_face)
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RL'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        LR(l_face, r_face)
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LR'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        RS(l_face, r_face)
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    numR = numR + 1
-                elif 'left' in selectKey:
-                    SL(l_face, r_face)
-                    direction = 'SL'
-                    results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    i = Llist[numL]
-                    if i == 1:
-                        LS(l_face, r_face)
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    elif i == 2:
-                        LR(l_face, r_face)
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LR'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        RS(l_face, r_face)
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    elif i == 3:
-                        LR(l_face, r_face)
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LR'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        RL(l_face, r_face)
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RL'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        LS(l_face, r_face)
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    numL = numL + 1
-            elif numtotal >= 45:
-                break
-    winsound.Beep(523, 500)
-    between()
+            rnd_left = total_passes - rnd
+            Spass_left = num_Spass_totl - num_Spass
+            Spass = prob_model(rnd_left, Spass_left, a)
 
-#####################################################################################
-# Decrease session
-
-#decrease (R基準)
-def decrease():
-    winsound.Beep(523, 5000)
-    numtotal = 0
-    numsub = 0
-    numcom = 0
-    numR = 0
-    numL = 0
-    numdeinR = 0
-    numdeinL = 0
-    for h in deinnumlist:
-        if h ==1:
-            RS() #1球目
-            numtotal = numtotal + 1
-            numcom = numcom + 1
-            i = 0
-            direction = 'RS'
-            Rtime = 0
-            selectKey = 0
-            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-            trialClock.reset() #ここから2球目
-            t = trialClock.getTime()
-            (selectKey, Rtime) = getKeyboardResponse(['right', 'left'], duration = 0) #'K' in selectKey is written in capital letter
-            numtotal = numtotal + 1
-            numsub = numsub + 1
-            if 'right' in selectKey:
-                SR() #2球目
-                direction = 'SR'
-                results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-            elif 'left' in selectKey:
-                SL() #2球目
-                direction = 'SL'
-                results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                LR() #3球目
-                numtotal = numtotal + 1
-                numcom = numcom + 1
-                i = 0
-                direction = 'LR'
-                Rtime = 0
-                selectKey = 0
-                results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-        else:
-            if numtotal < 45:
-                if h % 2 == 0: #偶数
-                    i = deinRlist[numdeinR]
-                    if i == 1:
-                        RL()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RL'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    else: #i==2
-                        RS()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        trialClock.reset() #ここからS試行
-                        t = trialClock.getTime()
-                        (selectKey, Rtime) = getKeyboardResponse(['right', 'left'], duration = 0) #'K' in selectKey is written in capital letter
-                        numtotal = numtotal + 1
-                        numsub = numsub + 1
-                        if 'right' in selectKey:
-                            SR()
-                            direction = 'SR'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                            RL()
-                            numtotal = numtotal + 1
-                            numcom = numcom + 1
-                            direction = 'RL'
-                            Rtime = 0
-                            selectKey = 'none'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        elif 'left' in selectKey:
-                            SL()
-                            direction = 'SL'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    numdeinR = numdeinR + 1
-                elif h % 2 == 1: #奇数
-                    i == deinLlist[numdeinL]
-                    if i == 1:
-                        LR()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LR'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    else: #i==2
-                        LS()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        trialClock.reset() #ここからS試行
-                        t = trialClock.getTime()
-                        (selectKey, Rtime) = getKeyboardResponse(['right', 'left'], duration = 0) #'K' in selectKey is written in capital letter
-                        numtotal = numtotal + 1
-                        numsub = numsub + 1
-                        if 'right' in selectKey:
-                            SR()
-                            direction = 'SR'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        elif 'left' in selectKey:
-                            SL()
-                            direction = 'SL'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                            LR()
-                            numtotal = numtotal + 1
-                            numcom = numcom + 1
-                            direction = 'LR'
-                            Rtime = 0
-                            selectKey = 'none'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    numdeinL = numdeinL + 1
-            elif numtotal >= 45:
-                break
-    winsound.Beep(523, 500)
-    between()
-
-#####################################################################################
-# Exclusion session
-
-#exclusion (R基準)
-def exclusion():
-    winsound.Beep(523, 5000)
-    numtotal = 0
-    numsub = 0
-    numcom = 0
-    numR = 0
-    numL = 0
-    for h in exnumlist:
-        if h ==1:
-            RS() #1球目
-            numtotal = numtotal + 1
-            numcom = numcom + 1
-            i = 0
-            direction = 'RS'
-            Rtime = 0
-            selectKey = 0
-            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-            trialClock.reset() #ここから2球目
-            t = trialClock.getTime()
-            (selectKey, Rtime) = getKeyboardResponse(['right', 'left'], duration = 0) #'K' in selectKey is written in capital letter
-            numtotal = numtotal + 1
-            numsub = numsub + 1
-            if 'right' in selectKey:
-                SR() #2球目
-                direction = 'SR'
-                results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-            elif 'left' in selectKey:
-                SL() #2球目
-                direction = 'SL'
-                results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                LR() #3球目
-                numtotal = numtotal + 1
-                numcom = numcom + 1
-                i = 0
-                direction = 'LR'
-                Rtime = 0
-                selectKey = 0
-                results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-        else:
-            if numtotal < 45:
-                if h % 2 == 0: #偶数
-                    i = exRlist[numexR]
-                    if i == 1:
-                        RL()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RL'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    else: #i==2
-                        RS()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        trialClock.reset() #ここからS試行
-                        t = trialClock.getTime()
-                        (selectKey, Rtime) = getKeyboardResponse(['right', 'left'], duration = 0) #'K' in selectKey is written in capital letter
-                        numtotal = numtotal + 1
-                        numsub = numsub + 1
-                        if 'right' in selectKey:
-                            SR()
-                            direction = 'SR'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                            RL()
-                            numtotal = numtotal + 1
-                            numcom = numcom + 1
-                            direction = 'RL'
-                            Rtime = 0
-                            selectKey = 'none'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        elif 'left' in selectKey:
-                            SL()
-                            direction = 'SL'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    numexR = numexR + 1
-                elif h % 2 == 1: #奇数
-                    i == exLlist[numexL]
-                    if i == 1:
-                        LR()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LR'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    else: #i==2
-                        LS()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        trialClock.reset() #ここからS試行
-                        t = trialClock.getTime()
-                        (selectKey, Rtime) = getKeyboardResponse(['right', 'left'], duration = 0) #'K' in selectKey is written in capital letter
-                        numtotal = numtotal + 1
-                        numsub = numsub + 1
-                        if 'right' in selectKey:
-                            SR()
-                            direction = 'SR'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        elif 'left' in selectKey:
-                            SL()
-                            direction = 'SL'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                            LR()
-                            numtotal = numtotal + 1
-                            numcom = numcom + 1
-                            direction = 'LR'
-                            Rtime = 0
-                            selectKey = 'none'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    numexL = numexL + 1
-            elif numtotal >= 45:
-                break
-    winsound.Beep(523, 500)
-    between()
-
-#####################################################################################
-# Increase session
-
-#increase (R基準)
-def increase():
-    winsound.Beep(523, 5000)
-    numtotal = 0
-    numsub = 0
-    numcom = 0
-    numR = 0
-    numL = 0
-    numdeinR = 0
-    numdeinL = 0
-    for h in deinnumlist:
-        if h ==1:
-            RS() #1球目
-            numtotal = numtotal + 1
-            numcom = numcom + 1
-            i = 0
-            direction = 'RS'
-            Rtime = 0
-            selectKey = 0
-            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-            trialClock.reset() #ここから2球目
-            t = trialClock.getTime()
-            (selectKey, Rtime) = getKeyboardResponse(['right', 'left'], duration = 0) #'K' in selectKey is written in capital letter
-            numtotal = numtotal + 1
-            numsub = numsub + 1
-            if 'right' in selectKey:
-                SR() #2球目
-                direction = 'SR'
-                results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-            elif 'left' in selectKey:
-                SL() #2球目
-                direction = 'SL'
-                results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                LR() #3球目
-                numtotal = numtotal + 1
-                numcom = numcom + 1
-                i = 0
-                direction = 'LR'
-                Rtime = 0
-                selectKey = 0
-                results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-        else:
-            if numtotal < 45:
-                if h % 2 == 0: #偶数
-                    i = deinRlist[numdeinR]
-                    if i == 1:
-                        RL()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RL'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    else: #i==2
-                        RS()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        trialClock.reset() #ここからS試行
-                        t = trialClock.getTime()
-                        (selectKey, Rtime) = getKeyboardResponse(['right', 'left'], duration = 0) #'K' in selectKey is written in capital letter
-                        numtotal = numtotal + 1
-                        numsub = numsub + 1
-                        if 'right' in selectKey:
-                            SR()
-                            direction = 'SR'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                            RL()
-                            numtotal = numtotal + 1
-                            numcom = numcom + 1
-                            direction = 'RL'
-                            Rtime = 0
-                            selectKey = 'none'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        elif 'left' in selectKey:
-                            SL()
-                            direction = 'SL'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    numdeinR = numdeinR + 1
-                elif h % 2 == 1: #奇数
-                    i == deinLlist[numdeinL]
-                    if i == 1:
-                        LR()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LR'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    else: #i==2
-                        LS()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        trialClock.reset() #ここからS試行
-                        t = trialClock.getTime()
-                        (selectKey, Rtime) = getKeyboardResponse(['right', 'left'], duration = 0) #'K' in selectg is written in capital letter
-                        numtotal = numtotal + 1
-                        numsub = numsub + 1
-                        if 'right' in selectKey:
-                            SR()
-                            direction = 'SR'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        elif 'left' in selectKey:
-                            SL()
-                            direction = 'SL'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                            LR()
-                            numtotal = numtotal + 1
-                            numcom = numcom + 1
-                            direction = 'LR'
-                            Rtime = 0
-                            selectKey = 'none'
-                            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    numdeinL = numdeinL + 1
-            elif numtotal >= 45:
-                break
-    winsound.Beep(523, 500)
-    between()
-
-#####################################################################################
-# Re-inclusion session
-
-#Re-inclusion
-def re_inclusion():
-    winsound.Beep(523, 5000)
-    numtotal = 0
-    numsub = 0
-    numcom = 0
-    numR = 0
-    numL = 0
-    for h in numlist:
-        numpy.random.shuffle(Rlist)
-        numpy.random.shuffle(Llist)
-        if h ==1:
-            RS()
-            numtotal = numtotal + 1
-            numcom = numcom + 1
-            i = 0
-            direction = 'RS'
-            Rtime = 0
-            selectKey = 0
-            results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-        else:
-            if numtotal < 45:
-                trialClock.reset()
-                t = trialClock.getTime()
-                (selectKey, Rtime) = getKeyboardResponse(['right', 'left'], duration = 0) #'K' in selectKey is written in capital letter
-                numtotal = numtotal + 1
-                numsub = numsub + 1
-                if 'right' in selectKey:
-                    SR()
-                    direction = 'SR'
-                    results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    i = Rlist[numR]
-                    if i == 1:
-                        RS()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    elif i == 2:
-                        RL()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RL'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        LS()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    elif i == 3:
-                        RL()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RL'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        LR()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LR'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        RS()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    numR = numR + 1
-                elif 'left' in selectKey:
-                    SL()
-                    direction = 'SL'
-                    results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    i = Llist[numL]
-                    if i == 1:
-                        LS()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    elif i == 2:
-                        LR()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LR'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        RS()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    elif i == 3:
-                        LR()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LR'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        RL()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'RL'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                        LS()
-                        numtotal = numtotal + 1
-                        numcom = numcom + 1
-                        direction = 'LS'
-                        Rtime = 0
-                        selectKey = 'none'
-                        results.append([numtotal]+[numsub]+[numcom]+[h]+[i]+[direction]+[Rtime]+[selectKey])
-                    numL = numL + 1
-            elif numtotal >= 45:
-                break
-    winsound.Beep(523, 500)
-
-
-def write_exp_data():
-    curD = os.getcwd()
-    datafile = open(os.path.join(curD,'log/Sub'+expInfo['Participant']+'_'+expInfo['dateStr']+'.csv'),'wb')  #save log as csvfile
-    datafile.write('numtotal,numsub,numcom,h,6ways,direction,responseTime,key\n')
-    for j in results:
-        datafile.write('%d,%d,%d,%d,%d,%s,%f,%s\n' % tuple(j))
-    datafile.close()
+            if Spass:
+                if cur_pos == 1:
+                    LS(l_face, r_face)
+                else:
+                    RS(l_face, r_face)
+                cur_pos = 0
+                num_Spass += 1
+            else:
+                if cur_pos == 1:
+                    LR(l_face, r_face)
+                    cur_pos = 2
+                else:
+                    RL(l_face, r_face)
+                    cur_pos = 1
+    m = int(total_passes / 3)
+    # winsound.Beep(523, 500)
+    # between()
 
 if __name__ == "__main__":
-    practice()
-    inclusion()
-    # decrease()
-    # exclusion()
-    # increase()
-    # re_inclusion()
-    write_exp_data()
-
-#ウインドウ前面 http://blogs.yahoo.co.jp/topitopi38/1291282.html
-#ウインドウ破棄 http://effbot.org/tkinterbook/toplevel.htm
-#ウインドウ位置 http://www.shido.info/py/tkinter8.html
-#beep音 http://blanktar.jp/blog/2013/08/python-beep.html
+    # user_id_input()
+    # practice()
+    session(60, 0.5)
