@@ -50,6 +50,7 @@ act_pos = (0.0, v_split - 1)  # Center of activity area
 act_size = [2.0, 1.4]
 
 uprof_pos_y = 1 - 0.43 * v_split  # Center of user profile section
+original_size = None
 uprof_size_f = numpy.array([0.8, 0.8])
 
 anim_frame_duration = 0.2  # Frame duration of animation
@@ -64,10 +65,13 @@ def make_faceimagestim(path):
 
 
 def set_face_pair(imstim1, imstim2):
+    global original_size
     imstim1.pos, imstim2.pos = (-0.5, uprof_pos_y), (0.5, uprof_pos_y)
+    if original_size is None:
+        original_size = imstim1.size
     imstim1.size, imstim2.size = (
-        imstim1.size * uprof_size_f,
-        imstim2.size * uprof_size_f,
+        original_size * uprof_size_f,
+        original_size * uprof_size_f,
     )
 
 
@@ -470,12 +474,13 @@ def session(total_passes, a=0.5):
                     cur_pos = 1
     m = int(total_passes / 3)
     winsound.Beep(523, 500)
-    between()
 
 
 if __name__ == "__main__":
     user_id_input()
     practice()
     session(60, 0.5)
+    between()
     session(60, 0.3)
+    between()
     session(60, 0.7)
