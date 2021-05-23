@@ -9,7 +9,7 @@ import win32gui
 import win32con
 import winsound
 
-import glob, os, random, time, csv
+import glob, os, random, time, csv, functools, logging
 import os.path as path
 
 # 参加者IDの入力を求め，それをファイル名に使う
@@ -94,7 +94,7 @@ face_p = {
     "neu": sorted(glob.glob(path.join(face_dir_root, "neufile", "*.jpg"))),
     "pos": sorted(glob.glob(path.join(face_dir_root, "posifile", "*.jpg"))),
 }
-
+num_faces = len(face_p['neg'])
 # Load face images
 face = {x: [make_faceimagestim(y_p) for y_p in y] for x, y in face_p.items()}
 
@@ -331,7 +331,7 @@ def between():
     myWin.setMouseVisible(False)
 
 
-def exit():
+def end():
     myWin.setMouseVisible(True)
     myWin.flip()
     exit = Tk()
@@ -361,21 +361,13 @@ def exit():
     myWin.setMouseVisible(False)
 
 
-# The id corresponding to the left and right user profile, cannot be the same
-left_person_id = random.randint(0, len(face["pos"]) - 1)
-right_person_id = random.choice(
-    [x for x in range(len(face["pos"])) if x != left_person_id]
-)
-
-
 def prob_model(rnd_left, Spass_left, a):
     """
     Probablistic model for passing to user
     Controled by parameter a, in range (0, 1.0)
-    a = 0.5, same probability passing to user across
-    the session; a < 0.5, higher probability passing to user
-    towards the end of the session; a > 0.5, higher probability
-    passing to user towards the start of the session.
+    - a = 0.5, same probability passing to user across the session
+    - a < 0.5, higher probability passing to user towards the end of the session
+    - a > 0.5, higher probability passing to user towards the start of the session.
     """
     not_Spass_left = rnd_left - Spass_left
     if Spass_left * 2 >= rnd_left:
@@ -387,32 +379,17 @@ def prob_model(rnd_left, Spass_left, a):
         r = random.uniform(0, 1.0)
         return r < x
 
-
-#####################################################################################
-# Practice session
-
-
-def practice():
-    instruction1()
-    instruction2()
-    instruction3()
-    connecting()
-
-    winsound.Beep(523, 5000)
-    l_face, r_face = face["neu"][left_person_id], face["neu"][right_person_id]
-    set_face_pair(l_face, r_face)
-    for h in range(22):
-        LR(l_face, r_face)
-        RL(l_face, r_face)
-    winsound.Beep(523, 500)
-    between()
-
+def generate_user_profile_pictures(playerids, emotions):
+    l_emo, r_emo = emotions
+    lid, rid = playerids
+    l_face, r_face = face[l_emo][lid], face[r_emo][rid]
+    return l_face, r_face
 
 #####################################################################################
 # Session template
 
 
-def session(total_passes, a=0.5):
+def session(total_passes, num_Spass_totl, players, a=0.5, session_label=None):
     """
     Main loop for a session
 
@@ -420,6 +397,12 @@ def session(total_passes, a=0.5):
     ---------
     total_passes: int
     Controls the total number of passes in this session
+
+    num_Spass_totl: int
+    Number to pass to user. Must be less than half of `total_passes`.
+
+    players: 2-tuple object
+    A tuple of images for left and right user profile picture.
 
     a: float [0, 1.0]
     Controls the distribution of probability passing to user, see
@@ -430,20 +413,24 @@ def session(total_passes, a=0.5):
     None
     """
     if not 0 <= a and a <= 1.0:
-        raise ValueError("Invalid value a.")
+        raise ValueError("Invalid x`value a.")
+
+    if num_Spass_totl * 2 > total_passes:
+        raise ValueError("Cannot pass to user more than half of total number of passes.")
+
+    logging.debug(f"Current session: {session_label}")
 
     winsound.Beep(523, 5000)
 
-    emotions = list(face.keys())
-    l_emo, r_emo = random.choice(emotions), random.choice(emotions)
-    l_face, r_face = face[l_emo][left_person_id], face[r_emo][right_person_id]
+    l_face, r_face = players
     set_face_pair(l_face, r_face)
 
     cur_pos = random.randint(0, 2)
     num_Spass = 0
     num_Spass_totl = round(total_passes / 3)
+
     if cur_pos == 0:
-        frame([l_face, r_face, LS_image_stim[0]])
+        frame([l_face, r_face, SL_image_stim[0]])
     for rnd in range(total_passes):
         if cur_pos == 0:
             (selectKey, react_time) = getKeyboardResponse(["left", "right"])
@@ -476,11 +463,73 @@ def session(total_passes, a=0.5):
     winsound.Beep(523, 500)
 
 
+#####################################################################################
+# Practice session
+
+def practice(playerids):
+    # instruction1()
+    # instruction2()
+    # instruction3()
+    # connecting()
+
+    player_profiles = generate_user_profile_pictures(playerids, ('pos', 'pos'))
+    session(20, 5, player_profiles, 0.5, "Practice")
+
+#####################################################################################
+# 6 sessions
+
+def make_sessions(playerids):
+    """
+    Session factory
+
+    Creates 6 sessions according to presets.
+
+    Returns a list of session lambdas, len=6
+    """
+    user_profiles = [
+        generate_user_profile_pictures(playerids, x) for x in
+        [('pos', 'neg'), ('pos', 'pos'), ('neg', 'neg'),
+         ('pos', 'pos'), ('neg', 'neg'), ('pos', 'neg')]
+    ]
+
+    total_passes = 30
+
+    # Acceptance: on the higher end of the upper half
+    # 0 |-----------|----{-------}| 15 (max possible Spasses)
+    acceptance_Spass_func = lambda: random.randint(11, 15)
+    # Rejection: on the lower end of the lower half
+    # 0 |--{----}-----|-----------| 15 (max possible Spasses)
+    rejection_Spass_func = lambda: random.randint(2, 6)
+
+    acceptance_param_a = 0.5
+    rejection_param_a = 0.8
+
+    session_args = [
+        [total_passes, acceptance_Spass_func(), user_profiles[0], acceptance_param_a, "PNacc"],
+        [total_passes, rejection_Spass_func(), user_profiles[1], rejection_param_a, "PPrej"],
+        [total_passes, acceptance_Spass_func(), user_profiles[2], acceptance_param_a, "NNacc"],
+        [total_passes, acceptance_Spass_func(), user_profiles[3], acceptance_param_a, "PPacc"],
+        [total_passes, rejection_Spass_func(), user_profiles[4], rejection_param_a, "NNrej"],
+        [total_passes, rejection_Spass_func(), user_profiles[5], rejection_param_a, "PNrej"],
+    ]
+
+    sessions = [functools.partial(session, *args) for args in session_args]
+    
+    # Fix front and back. Shuffle middle ones
+    mid_sessions = sessions[1:-1]
+    random.shuffle(mid_sessions)
+    sessions_reordered = [sessions[0]] + mid_sessions + [sessions[-1]]
+
+    return sessions_reordered
+
 if __name__ == "__main__":
-    user_id_input()
-    practice()
-    session(60, 0.5)
-    between()
-    session(60, 0.3)
-    between()
-    session(60, 0.7)
+    logging.basicConfig(filename="cyberball.log", level=logging.DEBUG)
+    # user_id_input()
+    playerids = random.choices(range(0, num_faces), k=2)
+    practice(playerids)
+    # between()
+    # sessions = make_sessions(playerids)
+    # for session in sessions:
+    #     session()
+    #     between()
+    # end()

@@ -4,3 +4,4 @@ _CATALOG.VIX
 vbtg-master/*
 lastParams.pickle
 .vscode/*
+*.log
