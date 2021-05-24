@@ -26,6 +26,7 @@ def getKeyboardResponse(validResponses):
         rt,
     ]  # only get the first response. no timer for waitKeys, so do it manually w/ a clock
 
+
 # 参加者IDの入力を求め，それをファイル名に使う
 try:
     expInfo = misc.fromFile("lastParams.pickle")
@@ -41,7 +42,7 @@ else:
     core.quit()
 
 # 画面設定をして、それをmyWinに入れる(myWinと打つだけで設定もはいる）
-myWin = visual.Window(fullscr=True, monitor="Default",  units="norm")
+myWin = visual.Window(fullscr=True, monitor="Default", units="norm")
 myWin.setMouseVisible(False)
 w, h = myWin.size[0], myWin.size[1]  # Size of window
 
@@ -70,6 +71,7 @@ def set_face_pair(imstim1, imstim2):
     imstim1.pos, imstim2.pos = (-0.5, uprof_pos_y), (0.5, uprof_pos_y)
     imstim1.size, imstim2.size = face_img_size_norm, face_img_size_norm
 
+
 # 提示刺激を準備
 wait = make_actimagestim("./stim/start.bmp")
 LS_image_stim = [make_actimagestim(x) for x in sorted(glob.glob("./stim/1toY*"))]
@@ -79,7 +81,7 @@ RL_image_stim = [make_actimagestim(x) for x in sorted(glob.glob("./stim/2to1*"))
 SL_image_stim = [make_actimagestim(x) for x in sorted(glob.glob("./stim/Yto1*"))]
 SR_image_stim = [make_actimagestim(x) for x in sorted(glob.glob("./stim/Yto2*"))]
 conw = visual.ImageStim(
-    myWin, image=u"./stim/connectingwindow.bmp", mask=None, pos=(0, 0), size=[0.4, 0.25]
+    myWin, image="./stim/connectingwindow.bmp", mask=None, pos=(0, 0), size=[0.4, 0.25]
 )
 
 # Face images paths
@@ -89,11 +91,12 @@ face_p = {
     "neu": sorted(glob.glob(path.join(face_dir_root, "neufile", "*.jpg"))),
     "pos": sorted(glob.glob(path.join(face_dir_root, "posifile", "*.jpg"))),
 }
-num_faces = len(face_p['neg'])
+num_faces = len(face_p["neg"])
 # Load face images
 face = {x: [make_faceimagestim(y_p) for y_p in y] for x, y in face_p.items()}
 
 logging.debug(face_p)
+
 
 def draw(*imgstims):
     for imgstim in imgstims:
@@ -158,20 +161,20 @@ def instruction1():
     inst1.title("Catchball(3people) -Instruction 1/3")
     inst1.geometry("600x180+20+20")  # 幅×高さ＋x＋y
     Label(
-        inst1, text=u"Catchballは、オンラインでキャッチボールを行うプログラムです。\n", font=("Meiryo UI", 12)
+        inst1, text="Catchballは、オンラインでキャッチボールを行うプログラムです。\n", font=("Meiryo UI", 12)
     ).pack()
     Label(
         inst1,
-        text=u"今回はあなたの他にあと　2　名の参加者の方がおり、　3　名でプレイしていただきます。",
+        text="今回はあなたの他にあと　2　名の参加者の方がおり、　3　名でプレイしていただきます。",
         font=("Meiryo UI", 12),
     ).pack()
     Label(
         inst1,
-        text=u"ボールが回ってきたら、左上のプレイヤーに投げる時は左ボタンを、\n右上のプレイヤーに投げる時は右ボタンを押してください。",
+        text="ボールが回ってきたら、左上のプレイヤーに投げる時は左ボタンを、\n右上のプレイヤーに投げる時は右ボタンを押してください。",
         font=("Meiryo UI", 12),
     ).pack()
     Label(
-        inst1, text=u"1ブロックあたり30～60球で、全部で5ブロック行なっていただきます。", font=("Meiryo UI", 12)
+        inst1, text="1ブロックあたり30～60球で、全部で5ブロック行なっていただきます。", font=("Meiryo UI", 12)
     ).pack()
     Button(inst1, text="Next", command=inst1.destroy).pack()
 
@@ -199,7 +202,7 @@ def instruction2():
     inst2.geometry("600x180+20+20")
     Label(
         inst2,
-        text=u"注意点があります。\n\n①ボールの動きが確実に止まってからボタンを押してください。\n②ボールを受け取ったらすぐに投げてください。\n\n",
+        text="注意点があります。\n\n①ボールの動きが確実に止まってからボタンを押してください。\n②ボールを受け取ったらすぐに投げてください。\n\n",
         font=("Meiryo UI", 12),
     ).pack()
     Button(inst2, text="Next", command=inst2.destroy).pack()
@@ -228,7 +231,7 @@ def instruction3():
     inst3.geometry("600x180+20+20")
     Label(
         inst3,
-        text=u"準備ができたらStartボタンを押してください。他プレイヤーとの接続を開始します。\n全プレイヤーの準備ができたらブロックを開始しますので、キーボードに指を置いてお待ちください。\n電極を装着した箇所は動かさないようにしてください。",
+        text="準備ができたらStartボタンを押してください。他プレイヤーとの接続を開始します。\n全プレイヤーの準備ができたらブロックを開始しますので、キーボードに指を置いてお待ちください。\n電極を装着した箇所は動かさないようにしてください。",
         font=("Meiryo UI", 12),
     ).pack()
     Button(inst3, text="Start", command=inst3.destroy).pack()
@@ -261,7 +264,7 @@ def connecting():
     connecting.geometry("600x180+20+20")
     Label(
         connecting,
-        text=u"他のプレイヤーが練習モードでプレイしています。\nブロック終了までしばらくお待ちください。\n\n電極を装着した箇所は動かさないようにしてください。",
+        text="他のプレイヤーが練習モードでプレイしています。\nブロック終了までしばらくお待ちください。\n\n電極を装着した箇所は動かさないようにしてください。",
         font=("Meiryo UI", 12),
     ).pack()
     Button(connecting, text=" OK ", command=connecting.destroy, anchor="w").pack()
@@ -292,11 +295,11 @@ def between():
     between.title("Catchball - 3people")
     between.geometry("600x220+20+20")
     Label(
-        between, text=u"\nブロックが終了しました。\nアンケートへの記入をお願いします。\n", font=("Meiryo UI", 12)
+        between, text="\nブロックが終了しました。\nアンケートへの記入をお願いします。\n", font=("Meiryo UI", 12)
     ).pack()
     Label(
         between,
-        text=u"回答が済んだらStartボタンを押してください。他プレイヤーとの接続を開始します。\n全プレイヤーの準備ができたら次ブロックを開始しますので、キーボードに指を置いてお待ちください。\n電極を装着した箇所は動かさないようにしてください。\nお互いに、他の2人がどんな人か想像しながら取り組んでください。",
+        text="回答が済んだらStartボタンを押してください。他プレイヤーとの接続を開始します。\n全プレイヤーの準備ができたら次ブロックを開始しますので、キーボードに指を置いてお待ちください。\n電極を装着した箇所は動かさないようにしてください。\nお互いに、他の2人がどんな人か想像しながら取り組んでください。",
         font=("Meiryo UI", 12),
     ).pack()
     Button(between, text="Start", command=between.destroy, anchor="w").pack()
@@ -333,8 +336,8 @@ def end():
     exit = Tk()
     exit.title("Catchball - 3people")
     exit.geometry("600x170+20+20")
-    Label(exit, text=u"\n5ブロックが終了しました。\n", font=("Meiryo UI", 12)).pack()
-    Label(exit, text=u"アンケートへの記入をお願いします。\n", font=("Meiryo UI", 12)).pack()
+    Label(exit, text="\n5ブロックが終了しました。\n", font=("Meiryo UI", 12)).pack()
+    Label(exit, text="アンケートへの記入をお願いします。\n", font=("Meiryo UI", 12)).pack()
     Button(exit, text="Start", anchor="w").pack()
     Button(exit, text=" Exit ", command=exit.destroy, anchor="w").pack()
 
@@ -375,12 +378,14 @@ def prob_model(rnd_left, Spass_left, a):
         r = random.uniform(0, 1.0)
         return r < x
 
+
 def generate_user_profile_pictures(playerids, emotions):
     logging.debug(f"Loading players {playerids}, emotions {emotions}")
     l_emo, r_emo = emotions
     lid, rid = playerids
     l_face, r_face = face[l_emo][lid], face[r_emo][rid]
     return l_face, r_face
+
 
 #####################################################################################
 # Session template
@@ -413,7 +418,9 @@ def session(total_passes, num_Spass_totl, players, a=0.5, session_label=None):
         raise ValueError("Invalid x`value a.")
 
     if num_Spass_totl * 2 > total_passes:
-        raise ValueError("Cannot pass to user more than half of total number of passes.")
+        raise ValueError(
+            "Cannot pass to user more than half of total number of passes."
+        )
 
     logging.debug(f"Current session: {session_label}")
 
@@ -465,17 +472,20 @@ def session(total_passes, num_Spass_totl, players, a=0.5, session_label=None):
 #####################################################################################
 # Practice session
 
+
 def practice(playerids):
     instruction1()
     instruction2()
     instruction3()
     connecting()
 
-    player_profiles = generate_user_profile_pictures(playerids, ('pos', 'pos'))
+    player_profiles = generate_user_profile_pictures(playerids, ("pos", "pos"))
     session(20, 5, player_profiles, 0.5, "Practice")
+
 
 #####################################################################################
 # 6 sessions
+
 
 def make_sessions(playerids):
     """
@@ -486,9 +496,15 @@ def make_sessions(playerids):
     Returns a list of session lambdas, len=6
     """
     user_profiles = [
-        generate_user_profile_pictures(playerids, x) for x in
-        [('pos', 'neg'), ('pos', 'pos'), ('neg', 'neg'),
-         ('pos', 'pos'), ('neg', 'neg'), ('pos', 'neg')]
+        generate_user_profile_pictures(playerids, x)
+        for x in [
+            ("pos", "neg"),
+            ("pos", "pos"),
+            ("neg", "neg"),
+            ("pos", "pos"),
+            ("neg", "neg"),
+            ("pos", "neg"),
+        ]
     ]
 
     total_passes = 30
@@ -504,16 +520,52 @@ def make_sessions(playerids):
     rejection_param_a = 0.8
 
     session_args = [
-        [total_passes, acceptance_Spass_func(), user_profiles[0], acceptance_param_a, "PNacc"],
-        [total_passes, rejection_Spass_func(), user_profiles[1], rejection_param_a, "PPrej"],
-        [total_passes, acceptance_Spass_func(), user_profiles[2], acceptance_param_a, "NNacc"],
-        [total_passes, acceptance_Spass_func(), user_profiles[3], acceptance_param_a, "PPacc"],
-        [total_passes, rejection_Spass_func(), user_profiles[4], rejection_param_a, "NNrej"],
-        [total_passes, rejection_Spass_func(), user_profiles[5], rejection_param_a, "PNrej"],
+        [
+            total_passes,
+            acceptance_Spass_func(),
+            user_profiles[0],
+            acceptance_param_a,
+            "PNacc",
+        ],
+        [
+            total_passes,
+            rejection_Spass_func(),
+            user_profiles[1],
+            rejection_param_a,
+            "PPrej",
+        ],
+        [
+            total_passes,
+            acceptance_Spass_func(),
+            user_profiles[2],
+            acceptance_param_a,
+            "NNacc",
+        ],
+        [
+            total_passes,
+            acceptance_Spass_func(),
+            user_profiles[3],
+            acceptance_param_a,
+            "PPacc",
+        ],
+        [
+            total_passes,
+            rejection_Spass_func(),
+            user_profiles[4],
+            rejection_param_a,
+            "NNrej",
+        ],
+        [
+            total_passes,
+            rejection_Spass_func(),
+            user_profiles[5],
+            rejection_param_a,
+            "PNrej",
+        ],
     ]
 
     sessions = [functools.partial(session, *args) for args in session_args]
-    
+
     # Fix front and back. Shuffle middle ones
     mid_sessions = sessions[1:-1]
     random.shuffle(mid_sessions)
@@ -521,12 +573,14 @@ def make_sessions(playerids):
 
     return sessions_reordered
 
+
 def get_player_id():
     all_players = [x for x in range(0, 5)]
     random.shuffle(all_players)
     playerids = all_players[0:2]
     logging.debug(f"Selected user ids: {playerids}")
     return playerids
+
 
 if __name__ == "__main__":
     playerids = get_player_id()
