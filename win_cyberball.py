@@ -12,21 +12,8 @@ import winsound
 import glob, os, random, time, csv, functools, logging
 import os.path as path
 
-# 参加者IDの入力を求め，それをファイル名に使う
-def user_id_input():
-    try:
-        expInfo = misc.fromFile("lastParams.pickle")
-    except:
-        expInfo = {"Participant": "001"}
-
-    expInfo["dateStr"] = data.getDateStr()
-
-    dlg = gui.DlgFromDict(expInfo, title="Experiment", fixed=["dateStr"])
-    if dlg.OK:
-        misc.toFile("lastParams.pickle", expInfo)
-    else:
-        core.quit()
-
+LGFMT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+logging.basicConfig(filename="cyberball.log", level=logging.DEBUG, format=LGFMT)
 
 # http://sapir.psych.wisc.edu/wiki/index.php/Psychopyのスクリプト
 def getKeyboardResponse(validResponses):
@@ -39,9 +26,22 @@ def getKeyboardResponse(validResponses):
         rt,
     ]  # only get the first response. no timer for waitKeys, so do it manually w/ a clock
 
+# 参加者IDの入力を求め，それをファイル名に使う
+try:
+    expInfo = misc.fromFile("lastParams.pickle")
+except:
+    expInfo = {"Participant": "001"}
+
+expInfo["dateStr"] = data.getDateStr()
+
+dlg = gui.DlgFromDict(expInfo, title="Experiment", fixed=["dateStr"])
+if dlg.OK:
+    misc.toFile("lastParams.pickle", expInfo)
+else:
+    core.quit()
 
 # 画面設定をして、それをmyWinに入れる(myWinと打つだけで設定もはいる）
-myWin = visual.Window(fullscr=False, monitor="Default", units="norm", color=(0, 0, 0))
+myWin = visual.Window(fullscr=True, monitor="Default",  units="norm")
 myWin.setMouseVisible(False)
 w, h = myWin.size[0], myWin.size[1]  # Size of window
 
@@ -50,8 +50,10 @@ act_pos = (0.0, v_split - 1)  # Center of activity area
 act_size = [2.0, 1.4]
 
 uprof_pos_y = 1 - 0.43 * v_split  # Center of user profile section
-original_size = None
-uprof_size_f = numpy.array([0.8, 0.8])
+face_img_size_px = (154, 219)
+img_aspect_ratio = face_img_size_px[0] / face_img_size_px[1]
+window_aspect_ratio = w / h
+face_img_size_norm = numpy.array([0.6 * img_aspect_ratio / window_aspect_ratio, 0.6])
 
 anim_frame_duration = 0.2  # Frame duration of animation
 
@@ -61,19 +63,12 @@ def make_actimagestim(path):
 
 
 def make_faceimagestim(path):
-    return visual.ImageStim(myWin, image=path)
+    return visual.ImageStim(myWin, image=path, units="norm")
 
 
 def set_face_pair(imstim1, imstim2):
-    global original_size
     imstim1.pos, imstim2.pos = (-0.5, uprof_pos_y), (0.5, uprof_pos_y)
-    if original_size is None:
-        original_size = imstim1.size
-    imstim1.size, imstim2.size = (
-        original_size * uprof_size_f,
-        original_size * uprof_size_f,
-    )
-
+    imstim1.size, imstim2.size = face_img_size_norm, face_img_size_norm
 
 # 提示刺激を準備
 wait = make_actimagestim("./stim/start.bmp")
@@ -98,6 +93,7 @@ num_faces = len(face_p['neg'])
 # Load face images
 face = {x: [make_faceimagestim(y_p) for y_p in y] for x, y in face_p.items()}
 
+logging.debug(face_p)
 
 def draw(*imgstims):
     for imgstim in imgstims:
@@ -324,7 +320,7 @@ def between():
     between.mainloop()
     myWin.setMouseVisible(False)
 
-    q = random.uniform(4.5, 100)
+    q = random.uniform(4.5, 60)
     conw.draw()
     myWin.flip()
     core.wait(q)
@@ -380,6 +376,7 @@ def prob_model(rnd_left, Spass_left, a):
         return r < x
 
 def generate_user_profile_pictures(playerids, emotions):
+    logging.debug(f"Loading players {playerids}, emotions {emotions}")
     l_emo, r_emo = emotions
     lid, rid = playerids
     l_face, r_face = face[l_emo][lid], face[r_emo][rid]
@@ -433,13 +430,15 @@ def session(total_passes, num_Spass_totl, players, a=0.5, session_label=None):
         frame([l_face, r_face, SL_image_stim[0]])
     for rnd in range(total_passes):
         if cur_pos == 0:
-            (selectKey, react_time) = getKeyboardResponse(["left", "right"])
+            (selectKey, _) = getKeyboardResponse(["left", "right", "q"])
             if "left" in selectKey:
                 SL(l_face, r_face)
                 cur_pos = 1
             elif "right" in selectKey:
                 SR(l_face, r_face)
                 cur_pos = 2
+            elif "q" in selectKey:
+                core.quit()
         else:
             rnd_left = total_passes - rnd
             Spass_left = num_Spass_totl - num_Spass
@@ -467,10 +466,10 @@ def session(total_passes, num_Spass_totl, players, a=0.5, session_label=None):
 # Practice session
 
 def practice(playerids):
-    # instruction1()
-    # instruction2()
-    # instruction3()
-    # connecting()
+    instruction1()
+    instruction2()
+    instruction3()
+    connecting()
 
     player_profiles = generate_user_profile_pictures(playerids, ('pos', 'pos'))
     session(20, 5, player_profiles, 0.5, "Practice")
@@ -522,14 +521,19 @@ def make_sessions(playerids):
 
     return sessions_reordered
 
+def get_player_id():
+    all_players = [x for x in range(0, 5)]
+    random.shuffle(all_players)
+    playerids = all_players[0:2]
+    logging.debug(f"Selected user ids: {playerids}")
+    return playerids
+
 if __name__ == "__main__":
-    logging.basicConfig(filename="cyberball.log", level=logging.DEBUG)
-    # user_id_input()
-    playerids = random.choices(range(0, num_faces), k=2)
+    playerids = get_player_id()
     practice(playerids)
-    # between()
-    # sessions = make_sessions(playerids)
-    # for session in sessions:
-    #     session()
-    #     between()
-    # end()
+    between()
+    sessions = make_sessions(playerids)
+    for session in sessions:
+        session()
+        between()
+    end()
