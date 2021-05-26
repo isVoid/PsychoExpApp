@@ -479,7 +479,7 @@ def practice(playerids):
     instruction3()
     connecting()
 
-    player_profiles = generate_user_profile_pictures(playerids, ("pos", "pos"))
+    player_profiles = generate_user_profile_pictures(playerids, ("neu", "ne"))
     session(20, 5, player_profiles, 0.5, "Practice")
 
 
