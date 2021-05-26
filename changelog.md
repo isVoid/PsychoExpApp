@@ -1,3 +1,6 @@
+0.3.1
+- Change to `neu` in practice session
+
 0.3
 - Full screen, user profile size and pos correctly set
 - Session alignment pattern
