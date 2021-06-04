@@ -42,12 +42,15 @@ def request_experiment_session_info():
     else:
         core.quit()
 
+
 expInfo = request_experiment_session_info()
 
 # 画面設定をして、それをmyWinに入れる(myWinと打つだけで設定もはいる）
 screen_width, screen_height = win32api.GetSystemMetrics(0), win32api.GetSystemMetrics(1)
 # myWin = visual.Window(fullscr=False, units="norm", size=(screen_width, screen_height), name="experiment", color=(0.5, 0.5, 0.5))
-myWin = visual.Window(fullscr=False, units="norm", name="experiment", color=(0.5, 0.5, 0.5))
+myWin = visual.Window(
+    fullscr=False, units="norm", name="experiment", color=(0.5, 0.5, 0.5)
+)
 myWin.setMouseVisible(True)
 w, h = myWin.size[0], myWin.size[1]  # Size of window
 
@@ -63,6 +66,7 @@ face_img_size_norm = numpy.array([0.6 * img_aspect_ratio / window_aspect_ratio, 
 
 anim_frame_duration = 0.2  # Frame duration of animation
 
+
 def set_min_style():
     """
     Use win32gui to set PsychoPy window as borderless, and maximized.
@@ -76,8 +80,10 @@ def set_min_style():
     win32gui.SetWindowLong(windowHandle, GWL_STYLE, style)
     win32gui.ShowWindow(windowHandle, SW_SHOWMAXIMIZED)
 
+
 # set_min_style()
 myWin.flip(False)
+
 
 def make_actimagestim(path):
     return visual.ImageStim(myWin, image=path, pos=act_pos, size=act_size)
@@ -174,12 +180,14 @@ def SR(l_face, r_face):
         SR_image_stim, l_face, r_face, anim_frame_duration, randomize_first_frame=False
     )
 
+
 def show_connection(time):
-    per_frame_time = 1 #s
+    per_frame_time = 1  # s
     time = math.ceil(time)
     conw_frames = [conw for _ in range(time)]
     for c in conw_frames:
         frame([c], per_frame_time)
+
 
 def make_qlabel(dlg, labels, font):
     txt = "\n".join(labels)
@@ -187,6 +195,7 @@ def make_qlabel(dlg, labels, font):
     qlabel.setText(txt)
     qlabel.setFont(font)
     return qlabel
+
 
 def message(title, labels, geometry, main_window, button_name="Next"):
     main_window.setMouseVisible(True)
@@ -205,13 +214,16 @@ def message(title, labels, geometry, main_window, button_name="Next"):
     dlg.exec()
     main_window.setMouseVisible(False)
 
+
 def instruction1(mywin):
     title = "Catchball(3people) -Instruction 1/3"
     geometry = "600x180+20+20"  # 幅×高さ＋x＋y
-    labels = ["Catchballは、オンラインでキャッチボールを行うプログラムです。\n",
-              "今回はあなたの他にあと　2　名の参加者の方がおり、　3　名でプレイしていただきます。",
-              "ボールが回ってきたら、左上のプレイヤーに投げる時は左ボタンを、\n右上のプレイヤーに投げる時は右ボタンを押してください。",
-              "1ブロックあたり30球で、全部で6ブロック行っていただきます。"]
+    labels = [
+        "Catchballは、オンラインでキャッチボールを行うプログラムです。\n",
+        "今回はあなたの他にあと　2　名の参加者の方がおり、　3　名でプレイしていただきます。",
+        "ボールが回ってきたら、左上のプレイヤーに投げる時は左ボタンを、\n右上のプレイヤーに投げる時は右ボタンを押してください。",
+        "1ブロックあたり30球で、全部で6ブロック行っていただきます。",
+    ]
     message(title, labels, geometry, mywin)
 
 
@@ -219,7 +231,7 @@ def instruction2(mywin):
     title = "Catchball(3people) -Instruction 2/3"
     geometry = "600x180+20+20"
     labels = ["注意点があります。\n", "①ボールの動きが確実に止まってからボタンを押してください。", "②ボールを受け取ったらすぐに投げてください。"]
-    message (title, labels, geometry, mywin)
+    message(title, labels, geometry, mywin)
 
 
 def instruction3(mywin):
@@ -230,7 +242,7 @@ def instruction3(mywin):
         "全プレイヤーの準備ができたらブロックを開始しますので、キーボードに指を置いてお待ちください。",
         "できるだけ画面に集中し、頭を動かさないようにしてください。",
     ]
-    message (title, labels, geometry, mywin)
+    message(title, labels, geometry, mywin)
 
 
 def connecting(mywin):
@@ -238,9 +250,11 @@ def connecting(mywin):
     mywin.setMouseVisible(True)
     title = "Catchball - 3people"
     geometry = "600x180+20+20"
-    labels = ["他のプレイヤーが練習モードでプレイしています。",
-                "ブロック終了までしばらくお待ちください。",
-                "電極を装着した箇所は動かさないようにしてください。"]
+    labels = [
+        "他のプレイヤーが練習モードでプレイしています。",
+        "ブロック終了までしばらくお待ちください。",
+        "電極を装着した箇所は動かさないようにしてください。",
+    ]
 
     message(title, labels, geometry, mywin)
 
@@ -250,15 +264,17 @@ def between(mywin):
     mywin.flip()
     title = "Catchball - 3people"
     geometry = "600x220+20+20"
-    labels = ["ブロックが終了しました。",
-              "アンケートへの記入をお願いします。",
-              "回答が済んだらStartボタンを押してください。他プレイヤーとの接続を開始します。",
-              "全プレイヤーの準備ができたら次ブロックを開始しますので、キーボードに指を置いてお待ちください。",
-              "電極を装着した箇所は動かさないようにしてください。",
-              "お互いに、他の2人がどんな人か、いまどんな気持ちか想像しながら取り組んでください。"]
-    
+    labels = [
+        "ブロックが終了しました。",
+        "アンケートへの記入をお願いします。",
+        "回答が済んだらStartボタンを押してください。他プレイヤーとの接続を開始します。",
+        "全プレイヤーの準備ができたら次ブロックを開始しますので、キーボードに指を置いてお待ちください。",
+        "電極を装着した箇所は動かさないようにしてください。",
+        "お互いに、他の2人がどんな人か、いまどんな気持ちか想像しながら取り組んでください。",
+    ]
+
     message(title, labels, geometry, mywin, button_name="Start")
-    
+
     q = random.uniform(4.5, 60)
     show_connection(time=q)
     mywin.setMouseVisible(False)
@@ -269,10 +285,13 @@ def end(mywin):
     mywin.flip()
     title = "Catchball - 3people"
     geometry = "600x170+20+20"
-    labels = ["6ブロックが終了しました。",
-              "アンケートへの記入をお願いします。",]
+    labels = [
+        "6ブロックが終了しました。",
+        "アンケートへの記入をお願いします。",
+    ]
 
     message(title, labels, geometry, mywin, button_name="Ok")
+
 
 def prob_model(rnd_left, Spass_left, a):
     """
@@ -306,7 +325,14 @@ def generate_user_profile_pictures(playerids, emotions):
 # Session template
 
 
-def session(total_passes, num_Spass_totl, players, a=0.5, session_label=None, expInfo = {'sessions': {}}):
+def session(
+    total_passes,
+    num_Spass_totl,
+    players,
+    a=0.5,
+    session_label=None,
+    expInfo={"sessions": {}},
+):
     """
     Main loop for a session
 
@@ -338,7 +364,7 @@ def session(total_passes, num_Spass_totl, players, a=0.5, session_label=None, ex
         )
 
     logging.debug(f"Current session: {session_label}")
-    expInfo['sessions'][session_label] = {'positions':[], 'reaction_times':[]}
+    expInfo["sessions"][session_label] = {"positions": [], "reaction_times": []}
 
     winsound.Beep(523, 5000)
 
@@ -351,10 +377,10 @@ def session(total_passes, num_Spass_totl, players, a=0.5, session_label=None, ex
     if cur_pos == 0:
         frame([l_face, r_face, SL_image_stim[0]])
     for rnd in range(total_passes):
-        expInfo['sessions'][session_label]['positions'].append(cur_pos)
+        expInfo["sessions"][session_label]["positions"].append(cur_pos)
         if cur_pos == 0:
             selectKey, reaction_time = getKeyboardResponse(["left", "right", "q"])
-            expInfo['sessions'][session_label]['reaction_times'].append(reaction_time)
+            expInfo["sessions"][session_label]["reaction_times"].append(reaction_time)
             if "left" in selectKey:
                 SL(l_face, r_face)
                 cur_pos = 1
@@ -484,8 +510,10 @@ def make_sessions(playerids, expInfo):
         ],
     ]
 
-    expInfo['sessions'] = {}
-    sessions = [functools.partial(session, *(args + [expInfo])) for args in session_args]
+    expInfo["sessions"] = {}
+    sessions = [
+        functools.partial(session, *(args + [expInfo])) for args in session_args
+    ]
 
     # Fix front and back. Shuffle middle ones
     mid_sessions = sessions[1:-1]
@@ -504,22 +532,29 @@ def get_player_id():
 
 
 def dump_exp_info(expInfo):
-    positions = {s: expInfo['sessions'][s]['positions'] for s in expInfo['sessions']}
-    reaction_times = {s: expInfo['sessions'][s]['reaction_times'] for s in expInfo['sessions']}
+    positions = {s: expInfo["sessions"][s]["positions"] for s in expInfo["sessions"]}
+    reaction_times = {
+        s: expInfo["sessions"][s]["reaction_times"] for s in expInfo["sessions"]
+    }
 
     # Align column lengths
     max_pos_len = max([len(positions[s]) for s in positions])
     max_rt_len = max([len(reaction_times[s]) for s in reaction_times])
-    positions = {s:pos + [None] * (max_pos_len - len(pos)) for s, pos in positions.items()}
-    reaction_times = {s:rt + [None] * (max_rt_len - len(rt)) for s, rt in reaction_times.items()}
-    
+    positions = {
+        s: pos + [None] * (max_pos_len - len(pos)) for s, pos in positions.items()
+    }
+    reaction_times = {
+        s: rt + [None] * (max_rt_len - len(rt)) for s, rt in reaction_times.items()
+    }
+
     pos_df = pd.DataFrame(positions)
     rt_df = pd.DataFrame(reaction_times)
 
-    filename = expInfo['Participant'] + "_" + expInfo['date'] + ".xlsx"
+    filename = expInfo["Participant"] + "_" + expInfo["date"] + ".xlsx"
     with pd.ExcelWriter(filename) as writer:
         pos_df.to_excel(writer, sheet_name="positions")
         rt_df.to_excel(writer, sheet_name="reaction_times")
+
 
 if __name__ == "__main__":
     playerids = get_player_id()
