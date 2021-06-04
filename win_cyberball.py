@@ -47,9 +47,12 @@ expInfo = request_experiment_session_info()
 
 # 画面設定をして、それをmyWinに入れる(myWinと打つだけで設定もはいる）
 screen_width, screen_height = win32api.GetSystemMetrics(0), win32api.GetSystemMetrics(1)
-# myWin = visual.Window(fullscr=False, units="norm", size=(screen_width, screen_height), name="experiment", color=(0.5, 0.5, 0.5))
 myWin = visual.Window(
-    fullscr=False, units="norm", name="experiment", color=(0.5, 0.5, 0.5)
+    fullscr=False,
+    units="norm",
+    size=(screen_width, screen_height),
+    name="experiment",
+    color=(0.5, 0.5, 0.5),
 )
 myWin.setMouseVisible(True)
 w, h = myWin.size[0], myWin.size[1]  # Size of window
