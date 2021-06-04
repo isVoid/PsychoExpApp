@@ -1,15 +1,20 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import QDialog, QPushButton, QVBoxLayout, QLabel
+
 from psychopy import visual, core, event, gui, data, misc
 import numpy
+import pandas as pd
 import tkinter
 from tkinter import *
 import win32gui
+import win32api
 import win32con
 import winsound
 
-import glob, os, random, time, csv, functools, logging
+import glob, os, random, time, csv, functools, logging, math
 import os.path as path
 
 LGFMT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -27,23 +32,23 @@ def getKeyboardResponse(validResponses):
     ]  # only get the first response. no timer for waitKeys, so do it manually w/ a clock
 
 
-# 参加者IDの入力を求め，それをファイル名に使う
-try:
-    expInfo = misc.fromFile("lastParams.pickle")
-except:
+def request_experiment_session_info():
     expInfo = {"Participant": "001"}
+    expInfo["date"] = data.getDateStr()
 
-expInfo["dateStr"] = data.getDateStr()
+    dlg = gui.DlgFromDict(expInfo, title="Experiment", fixed=["date"])
+    if dlg.OK:
+        return expInfo
+    else:
+        core.quit()
 
-dlg = gui.DlgFromDict(expInfo, title="Experiment", fixed=["dateStr"])
-if dlg.OK:
-    misc.toFile("lastParams.pickle", expInfo)
-else:
-    core.quit()
+expInfo = request_experiment_session_info()
 
 # 画面設定をして、それをmyWinに入れる(myWinと打つだけで設定もはいる）
-myWin = visual.Window(fullscr=True, monitor="Default", units="norm")
-myWin.setMouseVisible(False)
+screen_width, screen_height = win32api.GetSystemMetrics(0), win32api.GetSystemMetrics(1)
+# myWin = visual.Window(fullscr=False, units="norm", size=(screen_width, screen_height), name="experiment", color=(0.5, 0.5, 0.5))
+myWin = visual.Window(fullscr=False, units="norm", name="experiment", color=(0.5, 0.5, 0.5))
+myWin.setMouseVisible(True)
 w, h = myWin.size[0], myWin.size[1]  # Size of window
 
 v_split = 0.7
@@ -58,6 +63,21 @@ face_img_size_norm = numpy.array([0.6 * img_aspect_ratio / window_aspect_ratio, 
 
 anim_frame_duration = 0.2  # Frame duration of animation
 
+def set_min_style():
+    """
+    Use win32gui to set PsychoPy window as borderless, and maximized.
+    https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlongptra
+    https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles
+    """
+    windowHandle = win32gui.FindWindowEx(None, None, None, "PsychoPy")
+    GWL_STYLE = -16
+    SW_SHOWMAXIMIZED = 3
+    style = 0x0
+    win32gui.SetWindowLong(windowHandle, GWL_STYLE, style)
+    win32gui.ShowWindow(windowHandle, SW_SHOWMAXIMIZED)
+
+# set_min_style()
+myWin.flip(False)
 
 def make_actimagestim(path):
     return visual.ImageStim(myWin, image=path, pos=act_pos, size=act_size)
@@ -154,211 +174,105 @@ def SR(l_face, r_face):
         SR_image_stim, l_face, r_face, anim_frame_duration, randomize_first_frame=False
     )
 
+def show_connection(time):
+    per_frame_time = 1 #s
+    time = math.ceil(time)
+    conw_frames = [conw for _ in range(time)]
+    for c in conw_frames:
+        frame([c], per_frame_time)
 
-def instruction1():
-    myWin.setMouseVisible(True)
-    inst1 = Tk()
-    inst1.title("Catchball(3people) -Instruction 1/3")
-    inst1.geometry("600x180+20+20")  # 幅×高さ＋x＋y
-    Label(
-        inst1, text="Catchballは、オンラインでキャッチボールを行うプログラムです。\n", font=("Meiryo UI", 12)
-    ).pack()
-    Label(
-        inst1,
-        text="今回はあなたの他にあと　2　名の参加者の方がおり、　3　名でプレイしていただきます。",
-        font=("Meiryo UI", 12),
-    ).pack()
-    Label(
-        inst1,
-        text="ボールが回ってきたら、左上のプレイヤーに投げる時は左ボタンを、\n右上のプレイヤーに投げる時は右ボタンを押してください。",
-        font=("Meiryo UI", 12),
-    ).pack()
-    Label(
-        inst1, text="1ブロックあたり30～60球で、全部で5ブロック行なっていただきます。", font=("Meiryo UI", 12)
-    ).pack()
-    Button(inst1, text="Next", command=inst1.destroy).pack()
+def make_qlabel(dlg, labels, font):
+    txt = "\n".join(labels)
+    qlabel = QLabel(dlg)
+    qlabel.setText(txt)
+    qlabel.setFont(font)
+    return qlabel
 
-    def callback1():
-        hwnd = int(inst1.wm_frame(), 0)
-        win32gui.SetWindowPos(
-            hwnd,
-            win32con.HWND_TOPMOST,
-            0,
-            0,
-            0,
-            0,
-            win32con.SWP_NOMOVE | win32con.SWP_NOSIZE,
-        )
+def message(title, labels, geometry, main_window, button_name="Next"):
+    main_window.setMouseVisible(True)
 
-    inst1.after(
-        100, callback1
-    )  # デフォルトでは背面にウインドウが出てしまう。前面のコマンドはmainloopの後に呼び出さないと動作しないためタイマーで0.1sec後に前面固定
-    inst1.mainloop()
+    dlg = QDialog()
+    button = QPushButton(button_name, dlg)
+    font = QFont("Meiryo UI", 20)
+    qlabel = make_qlabel(dlg, labels, font)
+    layout = QVBoxLayout()
+    layout.addWidget(qlabel)
+    layout.addWidget(button)
+    dlg.setLayout(layout)
+    button.clicked.connect(lambda: dlg.accept())
 
+    dlg.raise_()
+    dlg.exec()
+    main_window.setMouseVisible(False)
 
-def instruction2():
-    inst2 = Tk()
-    inst2.title("Catchball(3people) -Instruction 2/3")
-    inst2.geometry("600x180+20+20")
-    Label(
-        inst2,
-        text="注意点があります。\n\n①ボールの動きが確実に止まってからボタンを押してください。\n②ボールを受け取ったらすぐに投げてください。\n\n",
-        font=("Meiryo UI", 12),
-    ).pack()
-    Button(inst2, text="Next", command=inst2.destroy).pack()
-
-    def callback1():
-        hwnd = int(inst2.wm_frame(), 0)
-        win32gui.SetWindowPos(
-            hwnd,
-            win32con.HWND_TOPMOST,
-            0,
-            0,
-            0,
-            0,
-            win32con.SWP_NOMOVE | win32con.SWP_NOSIZE,
-        )
-
-    inst2.after(
-        100, callback1
-    )  # デフォルトでは背面にウインドウが出てしまう。前面のコマンドはmainloopの後に呼び出さないと動作しないためタイマーで0.1sec後に前面固定
-    inst2.mainloop()
+def instruction1(mywin):
+    title = "Catchball(3people) -Instruction 1/3"
+    geometry = "600x180+20+20"  # 幅×高さ＋x＋y
+    labels = ["Catchballは、オンラインでキャッチボールを行うプログラムです。\n",
+              "今回はあなたの他にあと　2　名の参加者の方がおり、　3　名でプレイしていただきます。",
+              "ボールが回ってきたら、左上のプレイヤーに投げる時は左ボタンを、\n右上のプレイヤーに投げる時は右ボタンを押してください。",
+              "1ブロックあたり30球で、全部で6ブロック行っていただきます。"]
+    message(title, labels, geometry, mywin)
 
 
-def instruction3():
-    inst3 = Tk()
-    inst3.title("Catchball(3people) -Instruction 3/3")
-    inst3.geometry("600x180+20+20")
-    Label(
-        inst3,
-        text="準備ができたらStartボタンを押してください。他プレイヤーとの接続を開始します。\n全プレイヤーの準備ができたらブロックを開始しますので、キーボードに指を置いてお待ちください。\n電極を装着した箇所は動かさないようにしてください。",
-        font=("Meiryo UI", 12),
-    ).pack()
-    Button(inst3, text="Start", command=inst3.destroy).pack()
-
-    def callback1():
-        hwnd = int(inst3.wm_frame(), 0)
-        win32gui.SetWindowPos(
-            hwnd,
-            win32con.HWND_TOPMOST,
-            0,
-            0,
-            0,
-            0,
-            win32con.SWP_NOMOVE | win32con.SWP_NOSIZE,
-        )
-
-    inst3.after(
-        100, callback1
-    )  # デフォルトでは背面にウインドウが出てしまう。前面のコマンドはmainloopの後に呼び出さないと動作しないためタイマーで0.1sec後に前面固定
-    inst3.mainloop()
+def instruction2(mywin):
+    title = "Catchball(3people) -Instruction 2/3"
+    geometry = "600x180+20+20"
+    labels = ["注意点があります。\n", "①ボールの動きが確実に止まってからボタンを押してください。", "②ボールを受け取ったらすぐに投げてください。"]
+    message (title, labels, geometry, mywin)
 
 
-def connecting():
-    conw.draw()
-    myWin.flip()
-    core.wait(8)
-    myWin.setMouseVisible(True)
-    connecting = Tk()
-    connecting.title("Catchball - 3people")
-    connecting.geometry("600x180+20+20")
-    Label(
-        connecting,
-        text="他のプレイヤーが練習モードでプレイしています。\nブロック終了までしばらくお待ちください。\n\n電極を装着した箇所は動かさないようにしてください。",
-        font=("Meiryo UI", 12),
-    ).pack()
-    Button(connecting, text=" OK ", command=connecting.destroy, anchor="w").pack()
-
-    def callback1():
-        hwnd = int(connecting.wm_frame(), 0)
-        win32gui.SetWindowPos(
-            hwnd,
-            win32con.HWND_TOPMOST,
-            0,
-            0,
-            0,
-            0,
-            win32con.SWP_NOMOVE | win32con.SWP_NOSIZE,
-        )
-
-    connecting.after(
-        100, callback1
-    )  # デフォルトでは背面にウインドウが出てしまう。前面のコマンドはmainloopの後に呼び出さないと動作しないためタイマーで0.1sec後に前面固定
-    connecting.mainloop()
-    myWin.setMouseVisible(False)
+def instruction3(mywin):
+    title = "Catchball(3people) -Instruction 3/3"
+    geometry = "600x180+20+20"
+    labels = [
+        "準備ができたらStartボタンを押してください。他プレイヤーとの接続を開始します。",
+        "全プレイヤーの準備ができたらブロックを開始しますので、キーボードに指を置いてお待ちください。",
+        "できるだけ画面に集中し、頭を動かさないようにしてください。",
+    ]
+    message (title, labels, geometry, mywin)
 
 
-def between():
-    myWin.setMouseVisible(True)
-    myWin.flip()
-    between = Tk()
-    between.title("Catchball - 3people")
-    between.geometry("600x220+20+20")
-    Label(
-        between, text="\nブロックが終了しました。\nアンケートへの記入をお願いします。\n", font=("Meiryo UI", 12)
-    ).pack()
-    Label(
-        between,
-        text="回答が済んだらStartボタンを押してください。他プレイヤーとの接続を開始します。\n全プレイヤーの準備ができたら次ブロックを開始しますので、キーボードに指を置いてお待ちください。\n電極を装着した箇所は動かさないようにしてください。\nお互いに、他の2人がどんな人か想像しながら取り組んでください。",
-        font=("Meiryo UI", 12),
-    ).pack()
-    Button(between, text="Start", command=between.destroy, anchor="w").pack()
-    Button(between, text=" Exit ", anchor="w").pack()
+def connecting(mywin):
+    show_connection(time=8)
+    mywin.setMouseVisible(True)
+    title = "Catchball - 3people"
+    geometry = "600x180+20+20"
+    labels = ["他のプレイヤーが練習モードでプレイしています。",
+                "ブロック終了までしばらくお待ちください。",
+                "電極を装着した箇所は動かさないようにしてください。"]
 
-    def callback1():
-        hwnd = int(between.wm_frame(), 0)
-        win32gui.SetWindowPos(
-            hwnd,
-            win32con.HWND_TOPMOST,
-            0,
-            0,
-            0,
-            0,
-            win32con.SWP_NOMOVE | win32con.SWP_NOSIZE,
-        )
+    message(title, labels, geometry, mywin)
 
-    between.after(
-        100, callback1
-    )  # デフォルトでは背面にウインドウが出てしまう。前面のコマンドはmainloopの後に呼び出さないと動作しないためタイマーで0.1sec後に前面固定
-    between.mainloop()
-    myWin.setMouseVisible(False)
 
+def between(mywin):
+    mywin.setMouseVisible(True)
+    mywin.flip()
+    title = "Catchball - 3people"
+    geometry = "600x220+20+20"
+    labels = ["ブロックが終了しました。",
+              "アンケートへの記入をお願いします。",
+              "回答が済んだらStartボタンを押してください。他プレイヤーとの接続を開始します。",
+              "全プレイヤーの準備ができたら次ブロックを開始しますので、キーボードに指を置いてお待ちください。",
+              "電極を装着した箇所は動かさないようにしてください。",
+              "お互いに、他の2人がどんな人か、いまどんな気持ちか想像しながら取り組んでください。"]
+    
+    message(title, labels, geometry, mywin, button_name="Start")
+    
     q = random.uniform(4.5, 60)
-    conw.draw()
-    myWin.flip()
-    core.wait(q)
-    myWin.setMouseVisible(False)
+    show_connection(time=q)
+    mywin.setMouseVisible(False)
 
 
-def end():
-    myWin.setMouseVisible(True)
-    myWin.flip()
-    exit = Tk()
-    exit.title("Catchball - 3people")
-    exit.geometry("600x170+20+20")
-    Label(exit, text="\n5ブロックが終了しました。\n", font=("Meiryo UI", 12)).pack()
-    Label(exit, text="アンケートへの記入をお願いします。\n", font=("Meiryo UI", 12)).pack()
-    Button(exit, text="Start", anchor="w").pack()
-    Button(exit, text=" Exit ", command=exit.destroy, anchor="w").pack()
+def end(mywin):
+    mywin.setMouseVisible(True)
+    mywin.flip()
+    title = "Catchball - 3people"
+    geometry = "600x170+20+20"
+    labels = ["6ブロックが終了しました。",
+              "アンケートへの記入をお願いします。",]
 
-    def callback1():
-        hwnd = int(exit.wm_frame(), 0)
-        win32gui.SetWindowPos(
-            hwnd,
-            win32con.HWND_TOPMOST,
-            0,
-            0,
-            0,
-            0,
-            win32con.SWP_NOMOVE | win32con.SWP_NOSIZE,
-        )
-
-    exit.after(
-        100, callback1
-    )  # デフォルトでは背面にウインドウが出てしまう。前面のコマンドはmainloopの後に呼び出さないと動作しないためタイマーで0.1sec後に前面固定
-    exit.mainloop()
-    myWin.setMouseVisible(False)
-
+    message(title, labels, geometry, mywin, button_name="Ok")
 
 def prob_model(rnd_left, Spass_left, a):
     """
@@ -368,6 +282,7 @@ def prob_model(rnd_left, Spass_left, a):
     - a < 0.5, higher probability passing to user towards the end of the session
     - a > 0.5, higher probability passing to user towards the start of the session.
     """
+    logging.debug([rnd_left, Spass_left])
     not_Spass_left = rnd_left - Spass_left
     if Spass_left * 2 >= rnd_left:
         return True
@@ -391,7 +306,7 @@ def generate_user_profile_pictures(playerids, emotions):
 # Session template
 
 
-def session(total_passes, num_Spass_totl, players, a=0.5, session_label=None):
+def session(total_passes, num_Spass_totl, players, a=0.5, session_label=None, expInfo = {'sessions': {}}):
     """
     Main loop for a session
 
@@ -423,6 +338,7 @@ def session(total_passes, num_Spass_totl, players, a=0.5, session_label=None):
         )
 
     logging.debug(f"Current session: {session_label}")
+    expInfo['sessions'][session_label] = {'positions':[], 'reaction_times':[]}
 
     winsound.Beep(523, 5000)
 
@@ -431,13 +347,14 @@ def session(total_passes, num_Spass_totl, players, a=0.5, session_label=None):
 
     cur_pos = random.randint(0, 2)
     num_Spass = 0
-    num_Spass_totl = round(total_passes / 3)
 
     if cur_pos == 0:
         frame([l_face, r_face, SL_image_stim[0]])
     for rnd in range(total_passes):
+        expInfo['sessions'][session_label]['positions'].append(cur_pos)
         if cur_pos == 0:
-            (selectKey, _) = getKeyboardResponse(["left", "right", "q"])
+            selectKey, reaction_time = getKeyboardResponse(["left", "right", "q"])
+            expInfo['sessions'][session_label]['reaction_times'].append(reaction_time)
             if "left" in selectKey:
                 SL(l_face, r_face)
                 cur_pos = 1
@@ -474,12 +391,12 @@ def session(total_passes, num_Spass_totl, players, a=0.5, session_label=None):
 
 
 def practice(playerids):
-    instruction1()
-    instruction2()
-    instruction3()
-    connecting()
+    instruction1(myWin)
+    instruction2(myWin)
+    instruction3(myWin)
+    connecting(myWin)
 
-    player_profiles = generate_user_profile_pictures(playerids, ("neu", "ne"))
+    player_profiles = generate_user_profile_pictures(playerids, ("neu", "neu"))
     session(20, 5, player_profiles, 0.5, "Practice")
 
 
@@ -487,11 +404,12 @@ def practice(playerids):
 # 6 sessions
 
 
-def make_sessions(playerids):
+def make_sessions(playerids, expInfo):
     """
     Session factory
 
-    Creates 6 sessions according to presets.
+    Creates 6 sessions according to presets. expInfo is a dict
+    that holds the logs of the experiment.
 
     Returns a list of session lambdas, len=6
     """
@@ -511,13 +429,15 @@ def make_sessions(playerids):
 
     # Acceptance: on the higher end of the upper half
     # 0 |-----------|----{-------}| 15 (max possible Spasses)
-    acceptance_Spass_func = lambda: random.randint(11, 15)
+    # acceptance_Spass_func = lambda: random.randint(11, 15)
+    acceptance_Spass_func = lambda: 10
     # Rejection: on the lower end of the lower half
     # 0 |--{----}-----|-----------| 15 (max possible Spasses)
-    rejection_Spass_func = lambda: random.randint(2, 6)
+    # rejection_Spass_func = lambda: random.randint(2, 6)
+    rejection_Spass_func = lambda: 5
 
     acceptance_param_a = 0.5
-    rejection_param_a = 0.8
+    rejection_param_a = 0.92
 
     session_args = [
         [
@@ -564,7 +484,8 @@ def make_sessions(playerids):
         ],
     ]
 
-    sessions = [functools.partial(session, *args) for args in session_args]
+    expInfo['sessions'] = {}
+    sessions = [functools.partial(session, *(args + [expInfo])) for args in session_args]
 
     # Fix front and back. Shuffle middle ones
     mid_sessions = sessions[1:-1]
@@ -582,12 +503,36 @@ def get_player_id():
     return playerids
 
 
+def dump_exp_info(expInfo):
+    positions = {s: expInfo['sessions'][s]['positions'] for s in expInfo['sessions']}
+    reaction_times = {s: expInfo['sessions'][s]['reaction_times'] for s in expInfo['sessions']}
+
+    # Align column lengths
+    max_pos_len = max([len(positions[s]) for s in positions])
+    max_rt_len = max([len(reaction_times[s]) for s in reaction_times])
+    positions = {s:pos + [None] * (max_pos_len - len(pos)) for s, pos in positions.items()}
+    reaction_times = {s:rt + [None] * (max_rt_len - len(rt)) for s, rt in reaction_times.items()}
+    
+    pos_df = pd.DataFrame(positions)
+    rt_df = pd.DataFrame(reaction_times)
+
+    filename = expInfo['Participant'] + "_" + expInfo['date'] + ".xlsx"
+    with pd.ExcelWriter(filename) as writer:
+        pos_df.to_excel(writer, sheet_name="positions")
+        rt_df.to_excel(writer, sheet_name="reaction_times")
+
 if __name__ == "__main__":
     playerids = get_player_id()
     practice(playerids)
-    between()
-    sessions = make_sessions(playerids)
-    for session in sessions:
-        session()
-        between()
-    end()
+    between(myWin)
+
+    sessions = make_sessions(playerids, expInfo)
+    for i, session in enumerate(sessions):
+        if i < 0:
+            session()
+            between(myWin)
+        else:
+            session()
+            end(myWin)
+
+    dump_exp_info(expInfo)
