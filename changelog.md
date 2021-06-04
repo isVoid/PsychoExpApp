@@ -1,3 +1,10 @@
+v0.4
+- Borderless screen
+- Use QDialog for message boxes
+- Text update
+- Parameter adjustment
+- Experiment logging, excel format
+
 0.3.1
 - Change to `neu` in practice session
 
