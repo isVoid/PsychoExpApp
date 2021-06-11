@@ -5,3 +5,4 @@ vbtg-master/*
 lastParams.pickle
 .vscode/*
 *.log
+*.xlsx

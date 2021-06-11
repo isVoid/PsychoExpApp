@@ -1,3 +1,6 @@
+v0.4.2
+- Non full screen, but maximized
+
 v0.4.1
 - Convert to fullscreen
 

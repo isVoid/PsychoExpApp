@@ -48,7 +48,7 @@ expInfo = request_experiment_session_info()
 # 画面設定をして、それをmyWinに入れる(myWinと打つだけで設定もはいる）
 screen_width, screen_height = win32api.GetSystemMetrics(0), win32api.GetSystemMetrics(1)
 myWin = visual.Window(
-    fullscr=True,
+    fullscr=False,
     units="norm",
     size=(screen_width, screen_height),
     name="experiment",
@@ -68,6 +68,25 @@ window_aspect_ratio = w / h
 face_img_size_norm = numpy.array([0.6 * img_aspect_ratio / window_aspect_ratio, 0.6])
 
 anim_frame_duration = 0.2  # Frame duration of animation
+
+
+def set_min_style():
+    """
+    Use win32gui to set PsychoPy window as borderless, and maximized.
+    https://docs.microsoft.com/en-us/windows/win32/api/winuser/nf-winuser-setwindowlongptra
+    https://docs.microsoft.com/en-us/windows/win32/winmsg/window-styles
+    """
+    windowHandle = win32gui.FindWindowEx(None, None, None, "PsychoPy")
+    GWL_STYLE = -16
+    SW_SHOWMAXIMIZED = 3
+    style = 0x0
+    win32gui.SetWindowLong(windowHandle, GWL_STYLE, style)
+    win32gui.ShowWindow(windowHandle, SW_SHOWMAXIMIZED)
+
+
+set_min_style()
+myWin.flip(False)
+
 
 def make_actimagestim(path):
     return visual.ImageStim(myWin, image=path, pos=act_pos, size=act_size)
