@@ -1,3 +1,6 @@
+v0.4.1
+- Convert to fullscreen
+
 v0.4
 - Borderless screen
 - Use QDialog for message boxes
