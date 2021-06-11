@@ -17,6 +17,8 @@ import winsound
 import glob, os, random, time, csv, functools, logging, math
 import os.path as path
 
+import texts
+
 LGFMT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(filename="cyberball.log", level=logging.DEBUG, format=LGFMT)
 
@@ -192,8 +194,7 @@ def show_connection(time):
         frame([c], per_frame_time)
 
 
-def make_qlabel(dlg, labels, font):
-    txt = "\n".join(labels)
+def make_qlabel(dlg, txt, font):
     qlabel = QLabel(dlg)
     qlabel.setText(txt)
     qlabel.setFont(font)
@@ -204,6 +205,7 @@ def message(title, labels, geometry, main_window, button_name="Next"):
     main_window.setMouseVisible(True)
 
     dlg = QDialog()
+    dlg.setWindowTitle(title)
     button = QPushButton(button_name, dlg)
     font = QFont("Meiryo UI", 20)
     qlabel = make_qlabel(dlg, labels, font)
@@ -221,30 +223,21 @@ def message(title, labels, geometry, main_window, button_name="Next"):
 def instruction1(mywin):
     title = "Catchball(3people) -Instruction 1/3"
     geometry = "600x180+20+20"  # 幅×高さ＋x＋y
-    labels = [
-        "Catchballは、オンラインでキャッチボールを行うプログラムです。\n",
-        "今回はあなたの他にあと　2　名の参加者の方がおり、　3　名でプレイしていただきます。",
-        "ボールが回ってきたら、左上のプレイヤーに投げる時は左ボタンを、\n右上のプレイヤーに投げる時は右ボタンを押してください。",
-        "1ブロックあたり30球で、全部で6ブロック行っていただきます。",
-    ]
+    labels = texts.inst1_txt
     message(title, labels, geometry, mywin)
 
 
 def instruction2(mywin):
     title = "Catchball(3people) -Instruction 2/3"
     geometry = "600x180+20+20"
-    labels = ["注意点があります。\n", "①ボールの動きが確実に止まってからボタンを押してください。", "②ボールを受け取ったらすぐに投げてください。"]
+    labels = texts.inst2_txt
     message(title, labels, geometry, mywin)
 
 
 def instruction3(mywin):
     title = "Catchball(3people) -Instruction 3/3"
     geometry = "600x180+20+20"
-    labels = [
-        "準備ができたらStartボタンを押してください。他プレイヤーとの接続を開始します。",
-        "全プレイヤーの準備ができたらブロックを開始しますので、キーボードに指を置いてお待ちください。",
-        "できるだけ画面に集中し、頭を動かさないようにしてください。",
-    ]
+    labels = texts.inst3_txt
     message(title, labels, geometry, mywin)
 
 
@@ -253,11 +246,17 @@ def connecting(mywin):
     mywin.setMouseVisible(True)
     title = "Catchball - 3people"
     geometry = "600x180+20+20"
-    labels = [
-        "他のプレイヤーが練習モードでプレイしています。",
-        "ブロック終了までしばらくお待ちください。",
-        "電極を装着した箇所は動かさないようにしてください。",
-    ]
+    labels = texts.conn_txt
+
+    message(title, labels, geometry, mywin)
+
+
+def ready_for_test(mywin):
+    mywin.setMouseVisible(True)
+    mywin.flip()
+    title = "Catchball - 3people"
+    geometry = "600x180+20+20"
+    labels = texts.start_txt
 
     message(title, labels, geometry, mywin)
 
@@ -267,14 +266,7 @@ def between(mywin):
     mywin.flip()
     title = "Catchball - 3people"
     geometry = "600x220+20+20"
-    labels = [
-        "ブロックが終了しました。",
-        "アンケートへの記入をお願いします。",
-        "回答が済んだらStartボタンを押してください。他プレイヤーとの接続を開始します。",
-        "全プレイヤーの準備ができたら次ブロックを開始しますので、キーボードに指を置いてお待ちください。",
-        "電極を装着した箇所は動かさないようにしてください。",
-        "お互いに、他の2人がどんな人か、いまどんな気持ちか想像しながら取り組んでください。",
-    ]
+    labels = texts.between_txt
 
     message(title, labels, geometry, mywin, button_name="Start")
 
@@ -288,10 +280,7 @@ def end(mywin):
     mywin.flip()
     title = "Catchball - 3people"
     geometry = "600x170+20+20"
-    labels = [
-        "6ブロックが終了しました。",
-        "アンケートへの記入をお願いします。",
-    ]
+    labels = texts.end_txt
 
     message(title, labels, geometry, mywin, button_name="Ok")
 
@@ -562,11 +551,11 @@ def dump_exp_info(expInfo):
 if __name__ == "__main__":
     playerids = get_player_id()
     practice(playerids)
-    between(myWin)
+    ready_for_test(myWin)
 
     sessions = make_sessions(playerids, expInfo)
     for i, session in enumerate(sessions):
-        if i < 0:
+        if i < 5:
             session()
             between(myWin)
         else:

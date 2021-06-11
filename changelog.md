@@ -1,3 +1,8 @@
+v0.4.3
+- Texts change, make texts easier to change
+- New message box between practice and block 1
+- bug fix: showing between window before end block
+
 v0.4.2
 - Non full screen, but maximized
 

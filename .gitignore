@@ -6,3 +6,4 @@ lastParams.pickle
 .vscode/*
 *.log
 *.xlsx
+__pycache__
