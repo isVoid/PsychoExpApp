@@ -238,7 +238,7 @@ def instruction3(mywin):
     title = "Catchball(3people) -Instruction 3/3"
     geometry = "600x180+20+20"
     labels = texts.inst3_txt
-    message(title, labels, geometry, mywin)
+    message(title, labels, geometry, mywin, button_name="Start")
 
 
 def connecting(mywin):
@@ -258,7 +258,7 @@ def ready_for_test(mywin):
     geometry = "600x180+20+20"
     labels = texts.start_txt
 
-    message(title, labels, geometry, mywin)
+    message(title, labels, geometry, mywin, button_name="Ok")
 
 
 def between(mywin):
