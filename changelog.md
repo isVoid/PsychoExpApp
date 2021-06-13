@@ -1,3 +1,9 @@
+v0.4.5
+- New connecting window, threading, removed button inputs
+
+v0.4.4
+- Texts change
+
 v0.4.3
 - Texts change, make texts easier to change
 - New message box between practice and block 1
