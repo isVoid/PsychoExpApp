@@ -112,7 +112,7 @@ RL_image_stim = [make_actimagestim(x) for x in sorted(glob.glob("./stim/2to1*"))
 SL_image_stim = [make_actimagestim(x) for x in sorted(glob.glob("./stim/Yto1*"))]
 SR_image_stim = [make_actimagestim(x) for x in sorted(glob.glob("./stim/Yto2*"))]
 conw = visual.ImageStim(
-    myWin, image="./stim/connectingwindow.bmp", mask=None, pos=(0, 0), size=[0.4, 0.25]
+    myWin, image="./stim/connectingwindow.bmp", mask=None, pos=(0, 0), size=[0.8, 0.45]
 )
 
 # Face images paths
@@ -238,7 +238,7 @@ def instruction3(mywin):
     title = "Catchball(3people) -Instruction 3/3"
     geometry = "600x180+20+20"
     labels = texts.inst3_txt
-    message(title, labels, geometry, mywin, button_name="Start")
+    message(title, labels, geometry, mywin, button_name="START")
 
 
 def connecting(mywin):
@@ -258,7 +258,7 @@ def ready_for_test(mywin):
     geometry = "600x180+20+20"
     labels = texts.start_txt
 
-    message(title, labels, geometry, mywin, button_name="Ok")
+    message(title, labels, geometry, mywin, button_name="OK")
 
 
 def between(mywin):
@@ -268,7 +268,7 @@ def between(mywin):
     geometry = "600x220+20+20"
     labels = texts.between_txt
 
-    message(title, labels, geometry, mywin, button_name="Start")
+    message(title, labels, geometry, mywin, button_name="START")
 
     q = random.uniform(4.5, 60)
     show_connection(time=q)
@@ -282,7 +282,7 @@ def end(mywin):
     geometry = "600x170+20+20"
     labels = texts.end_txt
 
-    message(title, labels, geometry, mywin, button_name="Ok")
+    message(title, labels, geometry, mywin, button_name="OK")
 
 
 def prob_model(rnd_left, Spass_left, a):
@@ -415,7 +415,7 @@ def practice(playerids):
     connecting(myWin)
 
     player_profiles = generate_user_profile_pictures(playerids, ("neu", "neu"))
-    session(20, 5, player_profiles, 0.5, "Practice")
+    session(15, 5, player_profiles, 0.5, "Practice")
 
 
 #####################################################################################
