@@ -1,23 +1,38 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import QDialog, QPushButton, QVBoxLayout, QLabel
-
-from psychopy import visual, core, event, gui, data, misc
-import numpy
-import pandas as pd
-import tkinter
-from tkinter import *
-import win32gui
-import win32api
-import win32con
+import functools
+import glob
+import logging
+import math
+import os.path as path
+import random
+import threading
+import time
 import winsound
 
-import glob, os, random, time, csv, functools, logging, math
-import os.path as path
+import numpy
+import pandas as pd
+import PyQt5.QtCore
+import win32api
+import win32gui
+from psychopy import core, data, event, gui, misc, visual
+from PyQt5.QtGui import QFont
+from PyQt5.QtWidgets import (QDialog, QLabel, QProgressBar, QPushButton,
+                             QVBoxLayout)
 
 import texts
+
+
+class NoKeyboardReturnQDialog(QDialog):
+    def keyPressEvent(self, e):
+        if (
+            e.key() == PyQt5.QtCore.Qt.Key_Enter
+            or e.key() == PyQt5.QtCore.Qt.Key_Escape
+        ):
+            return
+        super().keyPressEvent(e)
+
 
 LGFMT = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 logging.basicConfig(filename="cyberball.log", level=logging.DEBUG, format=LGFMT)
@@ -220,6 +235,35 @@ def message(title, labels, geometry, main_window, button_name="Next"):
     main_window.setMouseVisible(False)
 
 
+def close_qdialog(dlg):
+    time.sleep(8)
+    dlg.close()
+
+
+def make_connecting_window(main_window):
+    main_window.setMouseVisible(False)
+
+    dlg = NoKeyboardReturnQDialog()
+    dlg.setWindowTitle("Catchball - 3people")
+
+    # Setup layout
+    layout = QVBoxLayout()
+    font = QFont("Meiryo UI", 20)
+    qlabel = make_qlabel(dlg, texts.connecting_txt, font)
+    layout.addWidget(qlabel)
+    progressbar = QProgressBar()
+    progressbar.setRange(0, 0)
+    layout.addWidget(progressbar)
+
+    dlg.setLayout(layout)
+    dlg.setWindowFlags(dlg.windowFlags() & ~PyQt5.QtCore.Qt.WindowCloseButtonHint)
+    dlg.raise_()
+    x = threading.Thread(target=close_qdialog, args=(dlg,))
+    x.start()
+    dlg.exec()
+    x.join()
+
+
 def instruction1(mywin):
     title = "Catchball(3people) -Instruction 1/3"
     geometry = "600x180+20+20"  # 幅×高さ＋x＋y
@@ -242,12 +286,12 @@ def instruction3(mywin):
 
 
 def connecting(mywin):
-    show_connection(time=8)
-    mywin.setMouseVisible(True)
+    mywin.flip()
+    make_connecting_window(mywin)
+
     title = "Catchball - 3people"
     geometry = "600x180+20+20"
     labels = texts.conn_txt
-
     message(title, labels, geometry, mywin)
 
 
