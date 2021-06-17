@@ -18,8 +18,7 @@ import win32api
 import win32gui
 from psychopy import core, data, event, gui, misc, visual
 from PyQt5.QtGui import QFont
-from PyQt5.QtWidgets import (QDialog, QLabel, QProgressBar, QPushButton,
-                             QVBoxLayout)
+from PyQt5.QtWidgets import QDialog, QLabel, QProgressBar, QPushButton, QVBoxLayout
 
 import texts
 
@@ -235,12 +234,12 @@ def message(title, labels, geometry, main_window, button_name="Next"):
     main_window.setMouseVisible(False)
 
 
-def close_qdialog(dlg):
-    time.sleep(8)
+def close_qdialog(dlg, t):
+    time.sleep(t)
     dlg.close()
 
 
-def make_connecting_window(main_window):
+def make_connecting_window(main_window, time=8):
     main_window.setMouseVisible(False)
 
     dlg = NoKeyboardReturnQDialog()
@@ -258,7 +257,7 @@ def make_connecting_window(main_window):
     dlg.setLayout(layout)
     dlg.setWindowFlags(dlg.windowFlags() & ~PyQt5.QtCore.Qt.WindowCloseButtonHint)
     dlg.raise_()
-    x = threading.Thread(target=close_qdialog, args=(dlg,))
+    x = threading.Thread(target=close_qdialog, args=(dlg, time))
     x.start()
     dlg.exec()
     x.join()
@@ -296,7 +295,6 @@ def connecting(mywin):
 
 
 def ready_for_test(mywin):
-    mywin.setMouseVisible(True)
     mywin.flip()
     title = "Catchball - 3people"
     geometry = "600x180+20+20"
@@ -306,7 +304,6 @@ def ready_for_test(mywin):
 
 
 def between(mywin):
-    mywin.setMouseVisible(True)
     mywin.flip()
     title = "Catchball - 3people"
     geometry = "600x220+20+20"
@@ -315,8 +312,7 @@ def between(mywin):
     message(title, labels, geometry, mywin, button_name="START")
 
     q = random.uniform(4.5, 60)
-    show_connection(time=q)
-    mywin.setMouseVisible(False)
+    make_connecting_window(mywin, time=q)
 
 
 def end(mywin):

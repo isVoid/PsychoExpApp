@@ -1,3 +1,6 @@
+v0.4.6
+- Apply new connecting window to all sessions
+
 v0.4.5
 - New connecting window, threading, removed button inputs
 
