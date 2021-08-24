@@ -6,6 +6,7 @@ import logging
 from typing import Tuple, Dict, Optional
 
 from animation import Animation
+from constants import FPS
 
 from psychopy import core, event
 
@@ -70,10 +71,9 @@ class SessionState(Enum):
     """
 
     SELECT_TARGET = 0
-    WAIT_USER_SETUP = 1
-    WAIT_USER = 2
-    IN_ACTION = 3
-    ACTION_FINISHED = 4
+    WAIT_USER = 1
+    IN_ACTION = 2
+    ACTION_FINISHED = 3
 
     INVALID = -1
 
@@ -110,6 +110,14 @@ class Session:
     state: SessionState
         The current state of the session. See SessionState
         for detail
+    cur_action: Animation
+        The current playing action Animation
+
+    is_first_time_wait_user: bool
+        Indicates if it is the first time entering WAIT_USER mode.
+        If so, clear events and record current timestamp.
+    reaction_time_t: float
+        A timestamp variable to record user input time
     """
 
     total_passes: int
@@ -126,6 +134,7 @@ class Session:
     state: SessionState
     cur_action: Animation
 
+    is_first_time_wait_user: bool
     reaction_time_t: float
 
     _pos_to_animation_map: Dict[Tuple[Position, Position], Animation]
@@ -149,6 +158,8 @@ class Session:
             "positions": [self.cur_pos],
             "reaction_times": [],
         }
+
+        self.is_first_time_wait_user = True
 
     def init_action_animation(self, action_animations):
         self._pos_to_animation_map = {
@@ -204,10 +215,6 @@ class Session:
             ]
         self.cur_action.reset()
 
-    def _wait_user_setup(self):
-        event.clearEvents()
-        self._reaction_time_t = core.getTime()
-
     def _check_user_select_target_async(self):
         """Check if the user has finished picking the target
         asynchronously and set the next target accordingly.
@@ -220,6 +227,11 @@ class Session:
         True if the user has finished picking the target.
         False if the user did not perform any input.
         """
+        if self.is_first_time_wait_user:
+            event.clearEvents()
+            self._reaction_time_t = core.getTime()
+            self.is_first_time_wait_user = False
+
         getKeyRes = event.getKeys(["left", "right", "q"], timeStamped=True)
         if len(getKeyRes) > 0:
             self.cur_pos = (
@@ -238,6 +250,7 @@ class Session:
             self.expInfo["sessions"][self.session_label]["reaction_times"].append(
                 reaction_timestamp - self._reaction_time_t
             )
+            self.is_first_time_wait_user = True
             return True
         return False
 
@@ -264,17 +277,13 @@ class Session:
             if self.cur_target == Position.SELF or (
                 self.cur_target is None and self.cur_pos == Position.SELF
             ):
-                self.state = SessionState.WAIT_USER_SETUP
+                self.state = SessionState.WAIT_USER
                 self._set_temporary_self_action()
                 self._draw_first_frame_animation()
             else:
                 self._select_target_non_self()
                 self.state = SessionState.IN_ACTION
                 self._draw_action_animation()
-        elif self.state == SessionState.WAIT_USER_SETUP:
-            self._wait_user_setup()
-            self.state = SessionState.WAIT_USER
-            self._draw_first_frame_animation()
         elif self.state == SessionState.WAIT_USER:
             if self._check_user_select_target_async():
                 self.state = SessionState.IN_ACTION

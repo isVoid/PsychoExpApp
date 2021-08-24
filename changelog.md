@@ -1,3 +1,7 @@
+v0.5.1
+- bug fixes
+- Make time recording more reliable
+
 v0.5.0
 - Update notes
     - Install moviepy: https://zulko.github.io/moviepy/install.html

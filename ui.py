@@ -142,7 +142,7 @@ def connecting(mywin):
     else:
         q = 8
 
-    make_connecting_window(mywin)
+    make_connecting_window(mywin, time=q)
 
 
 def ready_for_test(mywin):

@@ -253,7 +253,6 @@ class Main:
             else:
                 self.sessionloop(session, user_profile)
                 end(self.myWin)
-            break
 
         dump_exp_info(self.expInfo)
 
