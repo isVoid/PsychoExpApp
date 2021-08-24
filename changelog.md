@@ -1,3 +1,11 @@
+v0.5.0
+- Update notes
+    - Install moviepy: https://zulko.github.io/moviepy/install.html
+- Better file organization
+    - OOP design leads to better encapsulation
+    - Reimplemented mainloop to support rendering of both videos and the playball frames
+        - `Session` class supported with state machine
+
 v0.4.6
 - Apply new connecting window to all sessions
 

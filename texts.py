@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 inst1_txt = """
 Catchballは、オンラインでキャッチボールを行うプログラムです。
 

@@ -7,3 +7,4 @@ lastParams.pickle
 *.log
 *.xlsx
 __pycache__
+*.mp4
