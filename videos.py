@@ -1,8 +1,10 @@
-from psychopy import visual
+# from psychopy import visual
+
+from movie4 import MovieStim4
 
 
 def makeVideo(path, win, pos, size):
-    return visual.MovieStim3(
+    return MovieStim4(
         win,
         path,
         size=size,
@@ -10,6 +12,6 @@ def makeVideo(path, win, pos, size):
         units="norm",
         flipVert=False,
         flipHoriz=False,
-        loop=True,
+        loop=False,
         noAudio=True,
     )

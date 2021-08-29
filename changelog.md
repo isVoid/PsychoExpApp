@@ -1,3 +1,13 @@
+v0.5.2
+- Asynchronously load video
+    - MovieStim4: moved GL calls out of `loadVideo`, so that heavy
+        I/O portions of this method can be processed async
+    - Interleave forward/reversed playback
+        When forward video is playing, reversed video is loading
+        in the background. Vice versa.
+    - All video is no longer loaded at the front, but just before
+        each session, also interleaved with UI.
+
 v0.5.1
 - bug fixes
 - Make time recording more reliable

@@ -139,7 +139,9 @@ class Session:
 
     _pos_to_animation_map: Dict[Tuple[Position, Position], Animation]
 
-    def __init__(self, total_passes, num_Spass_totl, session_label, a, expInfo):
+    def __init__(
+        self, total_passes, num_Spass_totl, session_label, a, expInfo, user_profile
+    ):
         """Make sure you have called init_action_animation after init"""
         self.total_passes = total_passes
         self.num_Spass_totl = num_Spass_totl
@@ -158,6 +160,8 @@ class Session:
             "positions": [self.cur_pos],
             "reaction_times": [],
         }
+
+        self.user_profile = user_profile
 
         self.is_first_time_wait_user = True
 

@@ -28,9 +28,15 @@ from constants import (
     FPS,
 )
 
-import glob, logging, random
+import glob, logging, random, threading, itertools, multiprocessing
+from enum import Enum
 
 import numpy as np
+
+
+class VideoDirection(Enum):
+    FORWARD = 0
+    REVERSE = 1
 
 
 class Main:
@@ -39,7 +45,6 @@ class Main:
 
     def setup(self):
         self.myWin = make_window()
-        set_min_style()
         self.myWin.flip(False)
         self.load_actionframes()
 
@@ -51,8 +56,6 @@ class Main:
         self.all_emotions = ["pos", "neu", "neg"]
 
         self.player_ids = (self.all_persons[nids[0]], self.all_persons[nids[1]])
-
-        self.load_videos()
 
     def load_actionframes(self):
         LS_image_stim = [
@@ -96,24 +99,45 @@ class Main:
             "SR": SRAnimation,
         }
 
-    def load_videos(self):
+    def prepare_video(self, pid0, emotion0, pid1, emotion1):
         window_aspect_ratio = self.myWin.size[0] / self.myWin.size[1]
         face_vid_size_norm = (
             np.array([face_vid_aspect_ratio / window_aspect_ratio, 1.0]) * 0.6
         )
-        # optimization: only load the videos from player ids that are used
-        self.videos = {
-            p: {
-                e: makeVideo(
-                    f"./stim/video/{p}{e}.mp4",
-                    self.myWin,
-                    pos=(0, 0),
-                    size=face_vid_size_norm,
-                )
-                for e in self.all_emotions
-            }
-            for p in self.player_ids
-        }
+        video0_forward = makeVideo(
+            f"./stim/video/{pid0}{emotion0}.mp4",
+            self.myWin,
+            pos=lface_pos,
+            size=face_vid_size_norm,
+        )
+        video0_reverse = makeVideo(
+            f"./stim/video/reversed_{pid0}{emotion0}.mp4",
+            self.myWin,
+            pos=lface_pos,
+            size=face_vid_size_norm,
+        )
+        video1_forward = makeVideo(
+            f"./stim/video/{pid1}{emotion1}.mp4",
+            self.myWin,
+            pos=rface_pos,
+            size=face_vid_size_norm,
+        )
+        video1_reverse = makeVideo(
+            f"./stim/video/reversed_{pid1}{emotion1}.mp4",
+            self.myWin,
+            pos=rface_pos,
+            size=face_vid_size_norm,
+        )
+
+        self.current_video_forward = (video0_forward, video1_forward)
+        self.current_video_reverse = (video0_reverse, video1_reverse)
+
+    def launch_prepare_video_asnyc(self, user_profiles):
+        p1, p2 = user_profiles
+        self.videoLoadingThread = threading.Thread(
+            target=self.prepare_video, args=(p1[0], p1[1], p2[0], p2[1])
+        )
+        self.videoLoadingThread.start()
 
     def make_sessions_videos(self):
         """
@@ -125,14 +149,6 @@ class Main:
         Returns a list of session lambdas, len=6
         """
         l, r = self.player_ids
-        user_profiles = [
-            (self.videos[l]["pos"], self.videos[r]["neg"]),
-            (self.videos[l]["pos"], self.videos[r]["pos"]),
-            (self.videos[l]["neg"], self.videos[r]["neg"]),
-            (self.videos[l]["pos"], self.videos[r]["pos"]),
-            (self.videos[l]["neg"], self.videos[r]["neg"]),
-            (self.videos[l]["pos"], self.videos[r]["neg"]),
-        ]
 
         total_passes = 30
 
@@ -155,6 +171,7 @@ class Main:
                 "PNacc",
                 acceptance_param_a,
                 self.expInfo,
+                ((l, "pos"), (r, "neg")),
             ],
             [
                 total_passes,
@@ -162,6 +179,7 @@ class Main:
                 "PPrej",
                 rejection_param_a,
                 self.expInfo,
+                ((l, "pos"), (r, "pos")),
             ],
             [
                 total_passes,
@@ -169,6 +187,7 @@ class Main:
                 "NNacc",
                 acceptance_param_a,
                 self.expInfo,
+                ((l, "neg"), (r, "neg")),
             ],
             [
                 total_passes,
@@ -176,6 +195,7 @@ class Main:
                 "PPacc",
                 acceptance_param_a,
                 self.expInfo,
+                ((l, "pos"), (r, "pos")),
             ],
             [
                 total_passes,
@@ -183,6 +203,7 @@ class Main:
                 "NNrej",
                 rejection_param_a,
                 self.expInfo,
+                ((l, "neg"), (r, "neg")),
             ],
             [
                 total_passes,
@@ -190,6 +211,7 @@ class Main:
                 "PNrej",
                 rejection_param_a,
                 self.expInfo,
+                ((l, "pos"), (r, "neg")),
             ],
         ]
 
@@ -202,56 +224,96 @@ class Main:
         ordering = [0] + mid_ordering + [len(sessions) - 1]
 
         sessions_reordered = [sessions[i] for i in ordering]
-        user_profiles_reordered = [user_profiles[i] for i in ordering]
 
-        return user_profiles_reordered, sessions_reordered
+        return sessions_reordered
 
-    def sessionloop(self, session, user_profile):
+    def resetVideo(self, video0, video1):
+        video0.loadMovie(video0.filename)
+        video1.loadMovie(video1.filename)
+
+    def sessionloop(self, session):
+        self.videoLoadingThread.join()
+
+        self.current_video = self.current_video_forward
+        # Required by async movie loading (MovieStim4)
+        self.current_video[0]._updateFrameTexture()
+        self.current_video[1]._updateFrameTexture()
+        self.current_video_direction = VideoDirection.FORWARD
+
+        reverse_reload_thread = threading.Thread(
+            target=self.resetVideo, args=(self.current_video_reverse)
+        )
+
         self.run = True
         while self.run:
             session.poll()
-            user_profile[0].draw()
-            user_profile[1].draw()
             core.wait(1 / FPS)
             self.myWin.flip()
-
+            self.current_video[0].draw()
+            self.current_video[1].draw()
             if session.finished():
                 self.run = False
 
-    def make_practice_session(self):
-        session = Session(15, 5, "Practice", 0.5, {"sessions": {}})
-        session.init_action_animation(self.action_animations)
-        l, r = self.player_ids
-        user_profiles = self.videos[l]["neu"], self.videos[r]["neu"]
-        user_profiles[0].pos = lface_pos
-        user_profiles[1].pos = rface_pos
+            # When movie is finished, switch .current_video to the other playback
+            # direction.
+            if self.current_video[0].finished() or self.current_video[1].finished():
+                if self.current_video_direction == VideoDirection.FORWARD:
+                    # Switch to reverse direction, start reloading
+                    # forward video async
+                    self.current_video_direction = VideoDirection.REVERSE
+                    if reverse_reload_thread.isAlive():  # Cannot join if not started
+                        reverse_reload_thread.join()
+                    self.current_video = self.current_video_reverse
+                    forward_reload_thread = threading.Thread(
+                        target=self.resetVideo, args=(self.current_video_forward)
+                    )
+                    forward_reload_thread.start()
+                else:
+                    # Switch to forward direction, start reloading
+                    # reverse video async
+                    self.current_video_direction = VideoDirection.FORWARD
+                    forward_reload_thread.join()
+                    self.current_video = self.current_video_forward
+                    reverse_reload_thread = threading.Thread(
+                        target=self.resetVideo, args=(self.current_video_reverse)
+                    )
+                    reverse_reload_thread.start()
+                self.current_video[0]._updateFrameTexture()
+                self.current_video[1]._updateFrameTexture()
 
-        return user_profiles, session
+        self.myWin.flip()
+
+    def make_practice_session(self):
+        l, r = self.player_ids
+        session = Session(
+            15, 5, "Practice", 0.5, {"sessions": {}}, ((l, "neu"), (r, "neu"))
+        )
+        session.init_action_animation(self.action_animations)
+        return session
 
     def practice(self):
-        user_profile, practice_session = self.make_practice_session()
+        practice_session = self.make_practice_session()
+        self.launch_prepare_video_asnyc(practice_session.user_profile)
         instruction1(self.myWin)
         instruction2(self.myWin)
         instruction3(self.myWin)
         connecting(self.myWin)
-        self.sessionloop(practice_session, user_profile)
+        self.sessionloop(practice_session)
 
     def main(self):
         # Practice
         self.practice()
+
+        sessions = self.make_sessions_videos()
+        self.launch_prepare_video_asnyc(sessions[0].user_profile)
         ready_for_test(self.myWin)
-
-        user_profiles_videos, sessions = self.make_sessions_videos()
-        for i, p in enumerate(zip(user_profiles_videos, sessions)):
-            user_profile, session = p
-            user_profile[0].pos = lface_pos
-            user_profile[1].pos = rface_pos
-
+        for i, session in enumerate(sessions):
             if i < 5:
-                self.sessionloop(session, user_profile)
+                self.sessionloop(session)
+                self.launch_prepare_video_asnyc(sessions[i + 1].user_profile)
                 between(self.myWin)
             else:
-                self.sessionloop(session, user_profile)
+                self.sessionloop(session)
                 end(self.myWin)
 
         dump_exp_info(self.expInfo)

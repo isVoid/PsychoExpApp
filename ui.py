@@ -173,21 +173,6 @@ def end(mywin):
     make_end_window(mywin)
 
 
-def make_window():
-    screen_width, screen_height = win32api.GetSystemMetrics(
-        0
-    ), win32api.GetSystemMetrics(1)
-    myWin = visual.Window(
-        fullscr=False,
-        units="norm",
-        size=(screen_width, screen_height),
-        name="experiment",
-        color=(0.5, 0.5, 0.5),
-    )
-    myWin.setMouseVisible(False)
-    return myWin
-
-
 def set_min_style():
     """
     Use win32gui to set PsychoPy window as borderless, and maximized.
@@ -200,3 +185,20 @@ def set_min_style():
     style = 0x0
     win32gui.SetWindowLong(windowHandle, GWL_STYLE, style)
     win32gui.ShowWindow(windowHandle, SW_SHOWMAXIMIZED)
+
+
+def make_window():
+    screen_width, screen_height = win32api.GetSystemMetrics(
+        0
+    ), win32api.GetSystemMetrics(1)
+    myWin = visual.Window(
+        fullscr=False,
+        units="norm",
+        size=(screen_width, screen_height) if not __DEBUG__ else (640, 480),
+        name="experiment",
+        color=(0.5, 0.5, 0.5),
+    )
+    if not __DEBUG__:
+        myWin.setMouseVisible(False)
+        set_min_style()
+    return myWin

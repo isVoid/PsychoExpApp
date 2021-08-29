@@ -10,7 +10,7 @@ act_pos = (0.0, v_split - 1)  # Center of playball animation
 act_size = [2.0, 1.4]  # Normalized scale of playball animation
 
 uprof_pos_y = 1 - 0.43 * v_split  # Center of user profile section
-face_vid_size_px = (1280, 720)  # Native size of face videos
+face_vid_size_px = (728, 770)  # Native size of face videos
 face_vid_aspect_ratio = (
     face_vid_size_px[0] / face_vid_size_px[1]
 )  # Aspect ratio of face videos
