@@ -1,3 +1,10 @@
+v0.5.3
+- Fix a fatal bug that keeps the program from running
+    - MakeVideo attempts to perform a GL call within child threads, calling win.flip() when attempting to get retrace rate. Luckily this can be delegated outside of the child thread and perform on master thread.
+    - A new Main method: postPrepareVideoJoin that's supposed to put all logics to prepare video that's required to put in main thread.
+- Temporarily disable video frame counter catch up.
+    - Current mechanism that requires a busy wait to catch up is *very* bad.
+
 v0.5.2
 - Asynchronously load video
     - MovieStim4: moved GL calls out of `loadVideo`, so that heavy

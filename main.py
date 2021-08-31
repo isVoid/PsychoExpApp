@@ -100,6 +100,7 @@ class Main:
         }
 
     def prepare_video(self, pid0, emotion0, pid1, emotion1):
+        """Should be called in separate thread to avoid high block."""
         window_aspect_ratio = self.myWin.size[0] / self.myWin.size[1]
         face_vid_size_norm = (
             np.array([face_vid_aspect_ratio / window_aspect_ratio, 1.0]) * 0.6
@@ -138,6 +139,21 @@ class Main:
             target=self.prepare_video, args=(p1[0], p1[1], p2[0], p2[1])
         )
         self.videoLoadingThread.start()
+
+    def post_prepare_video_join(self):
+        """Should be called in main thread to post process
+        self.current_video_forawrd and self.current_video_reverse
+        to do whatever that was not doable in subthreads
+        """
+        self.current_video_forward[0].setRetraceRate(self.myWin)
+        self.current_video_forward[1].setRetraceRate(self.myWin)
+        self.current_video_reverse[0].setRetraceRate(self.myWin)
+        self.current_video_reverse[1].setRetraceRate(self.myWin)
+
+        self.current_video_forward[0]._updateFrameTexture()
+        self.current_video_forward[1]._updateFrameTexture()
+        # current_video_reverse._updateFrameTexture is called inside the
+        # while loop of self.sessionloop.
 
     def make_sessions_videos(self):
         """
@@ -233,11 +249,10 @@ class Main:
 
     def sessionloop(self, session):
         self.videoLoadingThread.join()
+        # Required by async movie loading (MovieStim4)
+        self.post_prepare_video_join()
 
         self.current_video = self.current_video_forward
-        # Required by async movie loading (MovieStim4)
-        self.current_video[0]._updateFrameTexture()
-        self.current_video[1]._updateFrameTexture()
         self.current_video_direction = VideoDirection.FORWARD
 
         reverse_reload_thread = threading.Thread(
@@ -278,6 +293,8 @@ class Main:
                         target=self.resetVideo, args=(self.current_video_reverse)
                     )
                     reverse_reload_thread.start()
+                # self.current_video_reverse first time calling _updateFrameTexture()
+                # is also here.
                 self.current_video[0]._updateFrameTexture()
                 self.current_video[1]._updateFrameTexture()
 

@@ -106,15 +106,6 @@ class MovieStim4(BaseVisualStim, ContainerMixin, TextureMixin):
         self._initParams.remove("self")
         super(MovieStim4, self).__init__(win, units=units, name=name, autoLog=False)
 
-        retraceRate = win._monitorFrameRate
-        if retraceRate is None:
-            retraceRate = win.getActualFrameRate()
-        if retraceRate is None:
-            logging.warning(
-                "FrameRate could not be supplied by psychopy; " "defaulting to 60.0"
-            )
-            retraceRate = 60.0
-        self._retraceInterval = 1.0 / retraceRate
         self.filename = pathToString(filename)
         self.loop = loop
         self.flipVert = flipVert
@@ -258,6 +249,17 @@ class MovieStim4(BaseVisualStim, ContainerMixin, TextureMixin):
         self.filename = filename
         logAttrib(self, log, "movie", filename)
 
+    def setRetraceRate(self, win):
+        retraceRate = win._monitorFrameRate
+        if retraceRate is None:
+            retraceRate = win.getActualFrameRate()
+        if retraceRate is None:
+            logging.warning(
+                "FrameRate could not be supplied by psychopy; " "defaulting to 60.0"
+            )
+            retraceRate = 60.0
+        self._retraceInterval = 1.0 / retraceRate
+
     def play(self, log=True):
         """Continue a paused movie from current position."""
         status = self.status
@@ -381,25 +383,26 @@ class MovieStim4(BaseVisualStim, ContainerMixin, TextureMixin):
             ):
                 return None
 
-        while self._nextFrameT <= (
-            self._videoClock.getTime() - self._frameInterval * 2
-        ):
-            self.nDroppedFrames += 1
-            if self.nDroppedFrames <= reportNDroppedFrames:
-                logging.warning(
-                    "{}: Video catchup needed, advancing self._nextFrameT from"
-                    " {} to {}".format(
-                        self._videoClock.getTime(),
-                        self._nextFrameT,
-                        self._nextFrameT + self._frameInterval,
-                    )
-                )
-            if self.nDroppedFrames == reportNDroppedFrames:
-                logging.warning(
-                    "Max reportNDroppedFrames reached, will not log any more dropped frames"
-                )
+        # TODO: enable vidoe catch up, not sure when to do it...
+        # while self._nextFrameT <= (
+        #     self._videoClock.getTime() - self._frameInterval * 2
+        # ):
+        #     self.nDroppedFrames += 1
+        #     if self.nDroppedFrames <= reportNDroppedFrames:
+        #         logging.warning(
+        #             "{}: Video catchup needed, advancing self._nextFrameT from"
+        #             " {} to {}".format(
+        #                 self._videoClock.getTime(),
+        #                 self._nextFrameT,
+        #                 self._nextFrameT + self._frameInterval,
+        #             )
+        #         )
+        #     if self.nDroppedFrames == reportNDroppedFrames:
+        #         logging.warning(
+        #             "Max reportNDroppedFrames reached, will not log any more dropped frames"
+        #         )
 
-            self._nextFrameT += self._frameInterval
+        #     self._nextFrameT += self._frameInterval
 
         try:
             self._numpyFrame = self._mov.get_frame(self._nextFrameT)
