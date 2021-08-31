@@ -1,3 +1,9 @@
+v0.5.4
+- Minor fixes
+    - Git was tracking animation.py with capitalized "A", fixing that.
+    - Add cyberball.bat for easy launch
+    - Add beeps
+
 v0.5.3
 - Fix a fatal bug that keeps the program from running
     - MakeVideo attempts to perform a GL call within child threads, calling win.flip() when attempting to get retrace rate. Luckily this can be delegated outside of the child thread and perform on master thread.

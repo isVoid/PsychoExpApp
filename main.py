@@ -17,6 +17,7 @@ from animation import make_actimagestim, Animation
 from utils import get_player_id, request_experiment_session_info, dump_exp_info
 from session import Session
 from psychopy import core
+import winsound
 
 from constants import (
     act_pos,
@@ -248,6 +249,7 @@ class Main:
         video1.loadMovie(video1.filename)
 
     def sessionloop(self, session):
+        winsound.Beep(523, 5000)
         self.videoLoadingThread.join()
         # Required by async movie loading (MovieStim4)
         self.post_prepare_video_join()
@@ -298,6 +300,7 @@ class Main:
                 self.current_video[0]._updateFrameTexture()
                 self.current_video[1]._updateFrameTexture()
 
+        winsound.Beep(523, 500)
         self.myWin.flip()
 
     def make_practice_session(self):
