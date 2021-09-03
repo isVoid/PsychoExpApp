@@ -8,3 +8,4 @@ lastParams.pickle
 *.xlsx
 __pycache__
 *.mp4
+*.bmp
