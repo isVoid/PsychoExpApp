@@ -4,3 +4,8 @@ _CATALOG.VIX
 vbtg-master/*
 lastParams.pickle
 .vscode/*
+*.log
+*.xlsx
+__pycache__
+*.mp4
+*.bmp
